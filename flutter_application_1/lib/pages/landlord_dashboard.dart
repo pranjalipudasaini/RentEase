@@ -3,15 +3,15 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/widgets.dart';
 
-class TenantDashboard extends StatefulWidget {
+class LandlordDashboard extends StatefulWidget {
   final String token;
-  const TenantDashboard({required this.token, Key? key}) : super(key: key);
+  const LandlordDashboard({required this.token, Key? key}) : super(key: key);
 
   @override
-  State<TenantDashboard> createState() => _TenantDashboardState();
+  State<LandlordDashboard> createState() => _LandlordDashboardState();
 }
 
-class _TenantDashboardState extends State<TenantDashboard> {
+class _LandlordDashboardState extends State<LandlordDashboard> {
   late String email;
 
   @override
@@ -43,7 +43,7 @@ class _TenantDashboardState extends State<TenantDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tenant Dashboard'),
+        title: const Text('Landlord Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -56,7 +56,7 @@ class _TenantDashboardState extends State<TenantDashboard> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Welcome to the tenant dashboard, $email!'),
+            Text('Welcome to the Landlord dashboard, $email!'),
           ],
         ),
       ),

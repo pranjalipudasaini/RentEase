@@ -8,6 +8,14 @@ exports.register = async (req, res, next) => {
             return res.status(400).json({ status: false, error: "All fields are required." });
         }
 
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+        if (!passwordRegex.test(password) && password.length < 8) {
+            return res.status(400).json({
+                status: false,
+                error: "Password must be at least 8 characters long, contain an uppercase letter, a lowercase letter, a number, and a special character.",
+            });
+        }
+
         if (password !== confirmPassword) {
             return res.status(400).json({ status: false, error: "Passwords do not match." });
         }
@@ -54,13 +62,47 @@ exports.login = async (req, res, next) => {
             return res.status(401).json({ status: false, error: "Invalid password." });
         }
 
-        let tokenData = { _id: user._id, email: user.email };
+        let tokenData = { _id: user._id, email: user.email, role: user.role }; // Include the role here
 
         const token = await UserService.generateToken(tokenData, "secretKey", '1h');
 
-        return res.status(200).json({ status: true, token: token });
+        return res.status(200).json({ 
+            status: true, 
+            token: token,
+            role: user.role // Send the role in the response
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ status: false, error: "Internal server error. Please try again later." });
+    }
+};
+
+exports.updateRole = async (req, res) => {
+    try {
+        const { email, role } = req.body;
+
+        if (!email || !role) {
+            return res.status(400).json({ status: false, error: "Email and role are required." });
+        }
+
+        const user = await UserService.findUserByEmail(email);
+        if (!user) {
+            return res.status(404).json({ status: false, error: "User not found." });
+        }
+
+        user.role = role;
+        await user.save();
+
+        // Generate a new token after updating the role
+        const tokenData = { _id: user._id, email: user.email, role: user.role };
+        const token = await UserService.generateToken(tokenData, "secretKey", '1h');
+
+        res.status(200).json({
+            status: true,
+            success: "Role updated successfully.",
+            token: token,  // Include the token in the response
+        });
+    } catch (err) {
+        res.status(500).json({ status: false, error: "Internal server error." });
     }
 };

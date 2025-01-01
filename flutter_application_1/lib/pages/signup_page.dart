@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/role_selection.dart';
 import 'login_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -23,7 +24,6 @@ class _SignupPageState extends State<SignUpPage> {
   String? fullName;
   String? email;
 
-  // Register function
   Future<void> registerUser() async {
     final String url = 'http://localhost:3000/';
     final String registration = url + 'registration';
@@ -43,9 +43,19 @@ class _SignupPageState extends State<SignUpPage> {
       );
 
       if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+
+        // Save user data in Shared Preferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fullName', fullName ?? '');
+        await prefs.setString('email', email ?? '');
+        await prefs.setString('token', responseData['token'] ?? '');
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User registered successfully')),
         );
+
+        // Navigate to RoleSelectionPage
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
@@ -153,8 +163,10 @@ class _SignupPageState extends State<SignUpPage> {
                       if (value == null || value.isEmpty) {
                         return "Password can't be empty.";
                       }
-                      if (value.length < 6) {
-                        return "Password must be at least 6 characters.";
+                      final passwordRegex = RegExp(
+                          r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$');
+                      if (value.length < 8 && !passwordRegex.hasMatch(value)) {
+                        return "Password must be at least 8 letters and contain an uppercase letter, a lowercase letter, a number, and a special character.";
                       }
                       return null;
                     },

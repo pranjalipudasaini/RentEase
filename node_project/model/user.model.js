@@ -18,8 +18,15 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true,
+    },
+    role: {
+        type: String,
+        enum: ['tenant', 'landlord'],
+        default: 'tenant'
     }
 });
+
+
 
 // Hash password before saving
 userSchema.pre('save', async function () {

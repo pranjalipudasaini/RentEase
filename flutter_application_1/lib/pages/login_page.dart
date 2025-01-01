@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/tenant_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -57,20 +59,29 @@ class _LoginPageState extends State<LoginPage> {
 
         if (responseData['status'] == true) {
           var myToken = responseData['token'];
-          prefs.setString('token', myToken);
+          var role = responseData['role']; // Extract role from the response
 
-          Navigator.pushReplacementNamed(
-            context,
-            '/tenantDashboard',
-            arguments: myToken,
-          );
+          prefs.setString('token', myToken);
+          prefs.setString('role', role); // Save the role in SharedPreferences
+
+          if (role == 'landlord') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: myToken),
+              ),
+            );
+          } else if (role == 'tenant') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TenantDashboard(token: myToken),
+              ),
+            );
+          }
         } else {
           showErrorDialog(responseData['error'] ?? "Invalid credentials.");
         }
-      } else if (response.statusCode == 401) {
-        showErrorDialog("Unauthorized: Incorrect email or password.");
-      } else if (response.statusCode == 500) {
-        showErrorDialog("Server error. Please try again later.");
       } else {
         showErrorDialog(
             "Unexpected error: ${response.statusCode}. Please try again.");

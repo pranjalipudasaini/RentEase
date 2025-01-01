@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/tenant_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -9,46 +11,107 @@ class RoleSelectionPage extends StatelessWidget {
 
   Future<void> updateUserRole(String role, BuildContext context) async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? email = prefs.getString('email');
+      print('SharedPreferences Email: $email'); // Debug log
+
+      if (email == null || email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: User email not found')),
+        );
+        return;
+      }
+
       final response = await http.put(
         Uri.parse('http://localhost:3000/updateRole'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'role': role, 'email': 'user_email_here'}),
+        body: jsonEncode({'role': role, 'email': email}),
       );
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+
         if (responseData['status']) {
+          // Save the updated role and token to SharedPreferences
+          var myToken = responseData['token'];
+
+          if (myToken == null || myToken.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Error: Token is null or empty')),
+            );
+            return; // Early exit if the token is invalid
+          }
+
+          await prefs.setString('token', myToken);
+          await prefs.setString(
+              'role', role); // Store role in SharedPreferences
+
+          // Navigate to the appropriate dashboard
           if (role == 'landlord') {
-            Navigator.pushNamed(context, '/landlordDashboard');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: myToken),
+              ),
+            );
           } else if (role == 'tenant') {
-            Navigator.pushNamed(context, '/tenantDashboard');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TenantDashboard(token: myToken),
+              ),
+            );
           }
         } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(responseData['error'])));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(responseData['error'] ?? 'An unknown error occurred'),
+            ),
+          );
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to update role')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  Future<void> confirmLogout(BuildContext context) async {
+    bool confirm = await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirm) {
+      logout(context);
     }
   }
 
   Future<void> logout(BuildContext context) async {
-    // Clear the shared preferences (if you're using it to store the token)
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    await prefs.clear();
 
-    // Redirect to the login page
     Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,7 +121,7 @@ class RoleSelectionPage extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               alignment: Alignment.topRight,
               child: ElevatedButton(
-                onPressed: () => logout(context),
+                onPressed: () => confirmLogout(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: HexColor("D9E3F0"),
                   shape: RoundedRectangleBorder(
