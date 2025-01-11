@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/get_started_page.dart';
 import 'package:flutter_application_1/pages/tenant_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -48,11 +48,9 @@ class RoleSelectionPage extends StatelessWidget {
 
           // Navigate to the appropriate dashboard
           if (role == 'landlord') {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => LandlordDashboard(token: myToken),
-              ),
+              MaterialPageRoute(builder: (context) => const GetStartedPage()),
             );
           } else if (role == 'tenant') {
             Navigator.pushReplacement(

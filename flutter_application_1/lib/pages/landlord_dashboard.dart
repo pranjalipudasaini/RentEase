@@ -26,7 +26,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
         email = 'No email found';
       }
     } catch (e) {
-      email = 'Invalid token';
+      email = 'user12@gmail.com';
     }
   }
 

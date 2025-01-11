@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/property_details.dart';
 import 'package:flutter_application_1/pages/signup_page.dart';
 import 'package:flutter_application_1/pages/tenant_dashboard.dart';
 import 'pages/login_page.dart';
@@ -47,7 +48,17 @@ class MyApp extends StatelessWidget {
           } else {
             return _errorRoute();
           }
+        } else if (settings.name == '/propertyDetails') {
+          if (settings.arguments != null && settings.arguments is String) {
+            final landlordId = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (context) => PropertyDetailsPage(landlordId: landlordId),
+            );
+          } else {
+            return _errorRoute();
+          }
         }
+        return null;
       },
     );
   }
