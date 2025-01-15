@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/rent/rent_controller.dart';
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:snippet_coder_utils/hex_color.dart';
 import 'package:intl/intl.dart';
 
 class RentDetailsPage extends StatefulWidget {
-  final double rentAmount;
   final String token;
+  final bool isFromSignUp;
 
   const RentDetailsPage({
     Key? key,
-    required this.rentAmount,
     required this.token,
+    this.isFromSignUp = false,
   }) : super(key: key);
 
   @override
@@ -46,7 +48,6 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
   Future<void> _saveRentDetails() async {
     if (_formKey.currentState!.validate()) {
       final rentDetails = {
-        "rentAmount": widget.rentAmount,
         "dueDate": _dueDateController.text,
         "otherCharges": double.tryParse(_otherChargesController.text) ?? 0,
         "lateFeeCharges": {
@@ -67,11 +68,14 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
         );
 
         if (response.statusCode == 201) {
+          // Update the RentController with the new rent data
+          RentController rentController = Get.find();
+          rentController.addRent(rentDetails);
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Rent details saved successfully!')),
           );
 
-          // Navigate to Landlord Dashboard
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -193,6 +197,24 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
                 child: const Text(
                   'Save',
                   style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  // Navigate to Landlord Dashboard
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LandlordDashboard(
+                        token: widget.token,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Skip for now',
+                  style: TextStyle(fontSize: 16, color: Colors.teal),
                 ),
               ),
             ],

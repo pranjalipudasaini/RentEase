@@ -2,7 +2,6 @@ const db = require('../config/db');
 const mongoose = require('mongoose');
 
 const rentSchema = new mongoose.Schema({
-    rentAmount: { type: Number, required: true },
     dueDate: { type: Date, required: true },
     otherCharges: { type: Number },
     lateFeeCharges: {

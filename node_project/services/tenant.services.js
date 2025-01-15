@@ -1,8 +1,17 @@
-const Tenant = require('./tenant.model');
+const Tenant = require('../model/tenant.model');
 
-exports.createTenant = async (data) => {
-  const tenant = new Tenant(data);
-  return await tenant.save();
-};
+class TenantServices {
+  static async createTenant(tenantData) {
+    try {
+      const tenant = new Tenant(tenantData);
+        
+        const savedTenant = await tenant.save();
+        
+        return savedTenant;
+    } catch (error) {
+        throw new Error('Error saving Tenant: ' + error.message);
+    }
+}
+}
 
 module.exports = TenantServices;

@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/rent_details.dart';
-import 'package:snippet_coder_utils/hex_color.dart';
+import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
+import 'package:get/get.dart'; // Import Get
+import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.dart'; // Import the TenantController
+import 'rent_details.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
 class TenantDetailsPage extends StatefulWidget {
-  final String landlordId;
   final String token;
+  final bool isFromSignUp;
 
   const TenantDetailsPage({
     Key? key,
-    required this.landlordId,
     required this.token,
+    this.isFromSignUp = false,
   }) : super(key: key);
 
   @override
@@ -56,7 +58,6 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
   Future<void> _saveTenantDetails() async {
     if (_formKey.currentState!.validate()) {
       final tenantDetails = {
-        "landlordId": widget.landlordId,
         "tenantName": _tenantNameController.text,
         "tenantEmail": _tenantEmailController.text,
         "tenantContactNumber": _tenantContactController.text,
@@ -80,18 +81,27 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
             const SnackBar(content: Text('Tenant details saved successfully!')),
           );
 
-          Navigator.push(
+          // Add tenant to the controller
+          TenantController tenantController = Get.find();
+          tenantController.addTenant(tenantDetails);
+
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => RentDetailsPage(
-                rentAmount: double.tryParse(_rentAmountController.text) ?? 0,
                 token: widget.token,
+                isFromSignUp: true,
               ),
             ),
           );
-        } else {
+        } else if (response.statusCode == 401) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save tenant: ${response.body}')),
+            const SnackBar(content: Text('Unauthorized. Please log in again.')),
+          );
+        } else {
+          final errorResponse = jsonDecode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${errorResponse['error']}')),
           );
         }
       } catch (error) {
@@ -114,7 +124,7 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -163,7 +173,7 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
               ElevatedButton(
                 onPressed: _saveTenantDetails,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: HexColor("062356"),
+                  backgroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -175,13 +185,41 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'Skip for now',
-                  style: TextStyle(fontSize: 16, color: Colors.teal),
+              if (widget.isFromSignUp)
+                TextButton(
+                  onPressed: () {
+                    // Navigate to TenantDetailsPage if accessed during sign-up
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RentDetailsPage(
+                          token: widget.token,
+                          isFromSignUp: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
+                )
+              else
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            LandlordDashboard(token: widget.token),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
                 ),
-              ),
             ],
           ),
         ),

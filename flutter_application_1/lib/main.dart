@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
+import 'package:flutter_application_1/pages/landlord/rent/rent_controller.dart';
+import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.dart';
 import 'package:flutter_application_1/pages/property_details.dart';
 import 'package:flutter_application_1/pages/signup_page.dart';
 import 'package:flutter_application_1/pages/tenant_dashboard.dart';
+import 'package:get/get.dart';
 import 'pages/login_page.dart';
 
 void main() {
+  Get.put(PropertiesController());
+  Get.put(TenantController());
+  Get.put(RentController());
   runApp(const MyApp());
 }
 
@@ -22,15 +29,16 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
-        if (settings.name case '/') {
+        // Correct route handling with `else if` and proper `arguments` checking
+        if (settings.name == '/') {
           return MaterialPageRoute(
             builder: (context) => const LoginPage(),
           );
-        } else if (settings.name case '/register') {
+        } else if (settings.name == '/register') {
           return MaterialPageRoute(
             builder: (context) => const SignUpPage(),
           );
-        } else if (settings.name case '/tenantDashboard') {
+        } else if (settings.name == '/tenantDashboard') {
           if (settings.arguments != null && settings.arguments is String) {
             final token = settings.arguments as String;
             return MaterialPageRoute(
@@ -39,7 +47,7 @@ class MyApp extends StatelessWidget {
           } else {
             return _errorRoute();
           }
-        } else if (settings.name case '/landlordDashboard') {
+        } else if (settings.name == '/landlordDashboard') {
           if (settings.arguments != null && settings.arguments is String) {
             final token = settings.arguments as String;
             return MaterialPageRoute(
@@ -50,9 +58,9 @@ class MyApp extends StatelessWidget {
           }
         } else if (settings.name == '/propertyDetails') {
           if (settings.arguments != null && settings.arguments is String) {
-            final landlordId = settings.arguments as String;
+            final token = settings.arguments as String;
             return MaterialPageRoute(
-              builder: (context) => PropertyDetailsPage(landlordId: landlordId),
+              builder: (context) => PropertyDetailsPage(token: token),
             );
           } else {
             return _errorRoute();

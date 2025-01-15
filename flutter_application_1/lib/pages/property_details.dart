@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
 import 'package:flutter_application_1/pages/tenant_details.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:snippet_coder_utils/hex_color.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
-  final String landlordId;
+  final String token;
+  final bool isFromSignUp;
 
-  const PropertyDetailsPage({Key? key, required this.landlordId})
-      : super(key: key);
+  const PropertyDetailsPage({
+    Key? key,
+    required this.token,
+    this.isFromSignUp = false, // Default to false
+  }) : super(key: key);
 
   @override
   _PropertyDetailsPageState createState() => _PropertyDetailsPageState();
@@ -24,7 +31,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   String? _selectedCity;
   String? _selectedFurnishing;
   String? _selectedType;
-  String? _selectedRoadType; // Added road type dropdown
+  String? _selectedRoadType;
   double _propertySize = 0;
   Map<String, bool> _amenities = {
     'Parking': false,
@@ -32,17 +39,15 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     'In-Unit Washer': false,
   };
 
-  // For the incremental room count buttons
   int _kitchenCount = 0;
   int _bathroomCount = 0;
   int _bedroomCount = 0;
   int _livingRoomCount = 0;
 
-  // Handle Save button
   Future<void> _savePropertyDetails() async {
     if (_formKey.currentState!.validate()) {
       final propertyDetails = {
-        'landlordId': widget.landlordId,
+        'token': widget.token,
         'propertyName': _propertyNameController.text,
         'address': _addressController.text,
         'country': _selectedCountry,
@@ -66,28 +71,38 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           Uri.parse('http://localhost:3000/property/saveProperty'),
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${widget.token}',
           },
           body: jsonEncode(propertyDetails),
         );
 
         if (response.statusCode == 201) {
-          // Show success message
+          // Add the property to the controller
+          Get.find<PropertiesController>().addProperty(propertyDetails);
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Property saved successfully!')),
           );
 
-          // Navigate to TenantDetailsPage
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TenantDetailsPage(
-                landlordId: widget.landlordId,
-                token: "example_token", // Replace with a real token if needed
+          // Navigate based on whether it's from sign-up or login
+          if (widget.isFromSignUp) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    TenantDetailsPage(token: widget.token, isFromSignUp: true),
               ),
-            ),
-          );
+            );
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: widget.token),
+              ),
+              (route) => false, // Remove all previous routes
+            );
+          }
         } else {
-          // Show error message
           print('Failed to save property: ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Failed to save property')),
@@ -307,6 +322,43 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 onPressed: _savePropertyDetails,
                 child: const Text('Save Property'),
               ),
+              const SizedBox(height: 16),
+              if (widget.isFromSignUp)
+                TextButton(
+                  onPressed: () {
+                    // Navigate to TenantDetailsPage if accessed during sign-up
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TenantDetailsPage(
+                          token: widget.token,
+                          isFromSignUp: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
+                )
+              else
+                TextButton(
+                  onPressed: () {
+                    // Navigate back to PropertiesPage if accessed after login
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            LandlordDashboard(token: widget.token),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
+                ),
             ],
           ),
         ),

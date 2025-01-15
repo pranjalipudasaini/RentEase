@@ -8,8 +8,12 @@ class GetStartedPage extends StatelessWidget {
   const GetStartedPage({Key? key}) : super(key: key);
 
   Future<String?> _getLandlordId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('landlordId');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token == null || token.isEmpty) {
+      print("Error: Token is missing!");
+    }
+    return token;
   }
 
   @override
@@ -139,17 +143,19 @@ class GetStartedPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () async {
                   // Retrieve landlordId from SharedPreferences
-                  String? landlordId = await _getLandlordId();
+                  String? token = await _getLandlordId();
 
                   // If landlordId is null, you can pass a mock or default value
-                  String idToPass = landlordId ?? 'defaultLandlordId';
+                  String tokenToPass = token ?? 'defaultLandlordId';
 
                   // Navigate to PropertyDetailsPage with the retrieved or default landlordId
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          PropertyDetailsPage(landlordId: idToPass),
+                      builder: (context) => PropertyDetailsPage(
+                        token: tokenToPass,
+                        isFromSignUp: true, // Set isFromSignUp to true
+                      ),
                     ),
                   );
                 },
