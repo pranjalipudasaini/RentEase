@@ -76,12 +76,22 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
             const SnackBar(content: Text('Rent details saved successfully!')),
           );
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LandlordDashboard(token: widget.token),
-            ),
-          );
+          if (widget.isFromSignUp) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: widget.token),
+              ),
+            );
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: widget.token),
+              ),
+              (route) => false, // Remove all previous routes
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to save rent: ${response.body}')),
@@ -200,23 +210,41 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  // Navigate to Landlord Dashboard
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LandlordDashboard(
-                        token: widget.token,
+              if (widget.isFromSignUp)
+                TextButton(
+                  onPressed: () {
+                    // Navigate to TenantDetailsPage if accessed during sign-up
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LandlordDashboard(
+                          token: widget.token,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Skip for now',
-                  style: TextStyle(fontSize: 16, color: Colors.teal),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
+                )
+              else
+                TextButton(
+                  onPressed: () {
+                    // Navigate back to PropertiesPage if accessed after login
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            LandlordDashboard(token: widget.token),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Skip for now',
+                    style: TextStyle(fontSize: 16, color: Colors.teal),
+                  ),
                 ),
-              ),
             ],
           ),
         ),

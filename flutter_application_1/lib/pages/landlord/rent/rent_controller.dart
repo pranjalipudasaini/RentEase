@@ -1,27 +1,17 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_application_1/pages/landlord/auth_service.dart';
 
 class RentController extends GetxController {
   var rents = <Map<String, dynamic>>[].obs;
-  var token = ''.obs;
+  late final RxString token;
 
   @override
   void onInit() {
     super.onInit();
-    _loadToken();
+    token = Get.find<AuthService>().token;
     _loadRents();
-  }
-
-  Future<void> _loadToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? storedToken = prefs.getString('token');
-    if (storedToken == null || storedToken.isEmpty) {
-      print("Error: Token is missing!");
-    } else {
-      token.value = storedToken;
-    }
   }
 
   Future<void> _loadRents() async {
@@ -33,6 +23,8 @@ class RentController extends GetxController {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         rents.value = List<Map<String, dynamic>>.from(data);
+      } else {
+        print("Failed to load rents: ${response.statusCode}");
       }
     } catch (e) {
       print("Error loading rents: $e");

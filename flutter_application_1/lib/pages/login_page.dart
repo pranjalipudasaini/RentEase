@@ -83,8 +83,7 @@ class _LoginPageState extends State<LoginPage> {
           showErrorDialog(responseData['error'] ?? "Invalid credentials.");
         }
       } else {
-        showErrorDialog(
-            "Unexpected error: ${response.statusCode}. Please try again.");
+        showErrorDialog("Error: Password not matched. Please try again.");
       }
     } catch (error) {
       setState(() {

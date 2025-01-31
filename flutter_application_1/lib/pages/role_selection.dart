@@ -167,6 +167,7 @@ class RoleSelectionPage extends StatelessWidget {
                   GestureDetector(
                     onTap: () => updateUserRole('landlord', context),
                     child: Card(
+                      color: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -207,6 +208,7 @@ class RoleSelectionPage extends StatelessWidget {
                   GestureDetector(
                     onTap: () => updateUserRole('tenant', context),
                     child: Card(
+                      color: Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

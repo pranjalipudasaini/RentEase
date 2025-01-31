@@ -3,6 +3,7 @@ import 'package:flutter_application_1/pages/role_selection.dart';
 import 'login_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:snippet_coder_utils/hex_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -186,6 +187,9 @@ class _SignupPageState extends State<SignUpPage> {
                   child: TextFormField(
                     controller: confirmPasswordController,
                     validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Password can't be empty.";
+                      }
                       if (value != passwordController.text) {
                         return "Passwords do not match.";
                       }
@@ -226,9 +230,13 @@ class _SignupPageState extends State<SignUpPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: HexColor("062356"),
                         padding: const EdgeInsets.symmetric(vertical: 15),
                       ),
-                      child: const Text("Sign Up"),
+                      child: const Text(
+                        "Sign Up",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

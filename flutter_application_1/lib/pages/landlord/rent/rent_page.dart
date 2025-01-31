@@ -4,28 +4,27 @@ import 'package:flutter_application_1/pages/rent_details.dart';
 import 'package:get/get.dart';
 
 class RentPage extends GetView<RentController> {
+  final RentController rentController = Get.put(RentController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Rent Page'),
-      ),
       body: Obx(() {
-        // Show loading spinner until the rents data is loaded
-        if (controller.rents.isEmpty) {
+        if (rentController.rents.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(),
+            child: Text(
+              "No rents added yet",
+              style: TextStyle(fontSize: 20),
+            ),
           );
         }
-
         return ListView.builder(
-          itemCount: controller.rents.length,
+          itemCount: rentController.rents.length,
           itemBuilder: (context, index) {
-            final rent = controller.rents[index];
+            final rent = rentController.rents[index];
             return ListTile(
-              title: Text(
-                  'Rent for ${rent['propertyName'] ?? 'Unnamed Property'}'),
+              title: Text('Rent for ${rent['propertyName'] ?? 'Property01'}'),
               subtitle: Text('Due Date: ${rent['dueDate'] ?? 'N/A'}'),
             );
           },
@@ -38,7 +37,7 @@ class RentPage extends GetView<RentController> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  RentDetailsPage(token: controller.token.value),
+                  RentDetailsPage(token: rentController.token.value),
             ),
           );
         },

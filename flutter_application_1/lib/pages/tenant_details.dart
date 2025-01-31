@@ -85,15 +85,23 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
           TenantController tenantController = Get.find();
           tenantController.addTenant(tenantDetails);
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RentDetailsPage(
-                token: widget.token,
-                isFromSignUp: true,
+          if (widget.isFromSignUp) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    RentDetailsPage(token: widget.token, isFromSignUp: true),
               ),
-            ),
-          );
+            );
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LandlordDashboard(token: widget.token),
+              ),
+              (route) => false, // Remove all previous routes
+            );
+          }
         } else if (response.statusCode == 401) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Unauthorized. Please log in again.')),

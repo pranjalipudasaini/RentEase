@@ -12,6 +12,20 @@ class PropertyServices {
             throw new Error('Error creating property: ' + error.message);
         }
     }
+
+    static async getPropertyData(userId) {
+            const propertyData = await PropertyModel.find({userId});            
+            return propertyData;
+    }
+
+    static async deleteProperty(propertyId) {
+        try {
+            const deletedProperty = await PropertyModel.findByIdAndDelete(propertyId);
+            return deletedProperty;
+        } catch (error) {
+            throw new Error("Error deleting property: " + error.message);
+        }
+    }    
 }
 
 module.exports = PropertyServices;

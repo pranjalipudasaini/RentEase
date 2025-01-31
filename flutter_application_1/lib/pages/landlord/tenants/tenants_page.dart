@@ -10,9 +10,6 @@ class TenantPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Tenant Page'),
-      ),
       body: Obx(() {
         if (tenantController.tenants.isEmpty) {
           return const Center(

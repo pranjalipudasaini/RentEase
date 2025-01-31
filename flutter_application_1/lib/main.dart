@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/landlord/auth_service.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
 import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
 import 'package:flutter_application_1/pages/landlord/rent/rent_controller.dart';
@@ -9,10 +10,13 @@ import 'package:flutter_application_1/pages/tenant_dashboard.dart';
 import 'package:get/get.dart';
 import 'pages/login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Get.putAsync(() => AuthService().init());
   Get.put(PropertiesController());
   Get.put(TenantController());
   Get.put(RentController());
+  // Run the app
   runApp(const MyApp());
 }
 
@@ -50,6 +54,18 @@ class MyApp extends StatelessWidget {
         } else if (settings.name == '/landlordDashboard') {
           if (settings.arguments != null && settings.arguments is String) {
             final token = settings.arguments as String;
+
+            // Manually initialize the required controllers
+            if (!Get.isRegistered<PropertiesController>()) {
+              Get.put(PropertiesController());
+            }
+            if (!Get.isRegistered<RentController>()) {
+              Get.put(RentController());
+            }
+            if (!Get.isRegistered<TenantController>()) {
+              Get.put(TenantController());
+            }
+
             return MaterialPageRoute(
               builder: (context) => LandlordDashboard(token: token),
             );

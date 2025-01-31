@@ -15,6 +15,7 @@ class PropertyDetailsPage extends StatefulWidget {
   const PropertyDetailsPage({
     Key? key,
     required this.token,
+    final Map<String, dynamic>? property,
     this.isFromSignUp = false, // Default to false
   }) : super(key: key);
 
