@@ -10,13 +10,26 @@ class PropertiesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    token = Get.find<AuthService>().token;
-    fetchProperties();
+
+    final authService = Get.find<AuthService>();
+    token = authService.token;
+
+    print("Retrieved Token: ${token.value}");
+    if (token.value.isNotEmpty) {
+      fetchProperties();
+    } else {
+      print("Error: Token is missing when fetching properties");
+    }
   }
 
-  Future<void> fetchProperties() async {
+  void fetchProperties() async {
     try {
-      print("Authorization Token: ${token.value}"); // Debugging
+      if (token.value.isEmpty) {
+        Get.snackbar('Error', 'Token is missing, unable to fetch properties');
+        return;
+      }
+
+      print("Authorization Token Before Request: '${token.value}'");
 
       final response = await http.get(
         Uri.parse('http://localhost:3000/property/getProperty'),
@@ -28,28 +41,96 @@ class PropertiesController extends GetxController {
 
       if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
-        print("Fetched Properties: $jsonResponse"); // Debugging
-
         if (jsonResponse['status'] == true) {
-          properties.value =
-              List<Map<String, dynamic>>.from(jsonResponse['success']);
+          // Validate and filter out properties with missing data
+          properties.value = List<Map<String, dynamic>>.from(
+              jsonResponse['success'].where((property) =>
+                  property['_id'] != null && property['propertyName'] != null));
         }
       } else {
-        Get.snackbar('Error', 'Failed to fetch properties');
+        Get.snackbar(
+            'Error', 'Failed to fetch properties: ${response.statusCode}');
       }
     } catch (e) {
       Get.snackbar('Error', 'Something went wrong: $e');
     }
   }
 
-  void addProperty(Map<String, dynamic> property) {
-    properties.add(property);
+  void addProperty(Map<String, dynamic> propertyData) async {
+    try {
+      if (token.value.isEmpty) {
+        print("Error: Token is missing before adding property");
+        Get.snackbar("Error", "Authorization token is missing.");
+        return;
+      }
+
+      // Check for duplicate property name before proceeding
+      bool nameExists = properties.any((property) =>
+          property['propertyName'] != null &&
+          property['propertyName'] == propertyData['propertyName']);
+
+      if (nameExists) {
+        Get.snackbar("Error", "A property with this name already exists.");
+        return;
+      }
+
+      // Proceed with adding the property
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/property/saveProperty'),
+        headers: {
+          'Authorization': 'Bearer ${token.value}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(propertyData),
+      );
+
+      print("Add Property Response: ${response.body}");
+
+      if (response.statusCode == 201) {
+        var jsonResponse = json.decode(response.body);
+        var newProperty = jsonResponse['property'];
+
+        if (newProperty != null && newProperty['_id'] != null) {
+          properties.add(newProperty); // Add the new property to the list
+          Get.snackbar("Success", "Property added successfully");
+        } else {
+          Get.snackbar("Error", "Invalid property response: Missing ID");
+        }
+      } else {
+        Get.snackbar("Error", "Failed to add property: ${response.body}");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Error adding property: $e");
+    }
+  }
+
+  void updateProperty(
+      String propertyId, Map<String, dynamic> updatedData) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://localhost:3000/property/updateProperty/$propertyId'),
+        headers: {
+          'Authorization': 'Bearer ${token.value}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(updatedData),
+      );
+
+      if (response.statusCode == 200) {
+        fetchProperties(); // Refresh the list
+        Get.snackbar("Success", "Property updated successfully");
+      } else {
+        Get.snackbar("Error", "Failed to update property");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Error updating property: $e");
+    }
   }
 
   void deleteProperty(int index) async {
     try {
-      final propertyId = properties[index]['_id']; // Ensure this field exists
-      print("Property ID to delete: $propertyId"); // Debugging
+      final propertyId = properties[index]['_id']; // Ensure `_id` is present
+      print("Property ID to delete: $propertyId");
 
       if (propertyId == null) {
         Get.snackbar("Error", "Invalid Property ID");

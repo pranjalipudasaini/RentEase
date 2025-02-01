@@ -12,11 +12,20 @@ class AuthService extends GetxService {
   Future<void> _loadToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedToken = prefs.getString('token');
-    if (storedToken == null || storedToken.isEmpty) {
-      print("Error: Token is missing!");
-    } else {
-      print("Loaded token: $storedToken");
+
+    print("Stored Token in SharedPreferences: $storedToken");
+
+    if (storedToken != null && storedToken.isNotEmpty) {
       token.value = storedToken;
+    } else {
+      print("Error: Token is missing in SharedPreferences!");
     }
+  }
+
+  Future<void> saveToken(String newToken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', newToken);
+    token.value = newToken;
+    print("Token saved: $newToken"); // Debugging log
   }
 }

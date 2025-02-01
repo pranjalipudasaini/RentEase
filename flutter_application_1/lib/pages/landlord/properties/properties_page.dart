@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 class PropertiesPage extends GetView<PropertiesController> {
   final PropertiesController propertyController =
-      Get.put(PropertiesController());
+      Get.find<PropertiesController>();
 
   @override
   Widget build(BuildContext context) {
@@ -132,15 +132,16 @@ class PropertiesPage extends GetView<PropertiesController> {
         );
       }),
       floatingActionButton: FloatingActionButton(
-        heroTag: 'propertiesPageFab',
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) =>
                   PropertyDetailsPage(token: propertyController.token.value),
             ),
           );
+
+          propertyController.fetchProperties();
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,

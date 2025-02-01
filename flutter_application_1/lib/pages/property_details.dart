@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
-import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
-import 'package:flutter_application_1/pages/tenant_details.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
+import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
+import 'package:flutter_application_1/pages/tenant_details.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   final String token;
+  final Map<String, dynamic>? property;
   final bool isFromSignUp;
 
   const PropertyDetailsPage({
     Key? key,
     required this.token,
-    final Map<String, dynamic>? property,
-    this.isFromSignUp = false, // Default to false
+    this.property,
+    this.isFromSignUp = false,
   }) : super(key: key);
 
   @override
@@ -45,22 +46,73 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   int _bedroomCount = 0;
   int _livingRoomCount = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.property != null) {
+      _populatePropertyDetails(widget.property!);
+    }
+  }
+
+  void _populatePropertyDetails(Map<String, dynamic> property) {
+    _propertyNameController.text = property['propertyName'] ?? '';
+    _addressController.text = property['address'] ?? '';
+    _selectedCountry = property['country'] ?? 'Nepal';
+    _selectedCity = property['city'];
+    _selectedFurnishing = property['furnishing'];
+    _selectedType = property['type'];
+    _selectedRoadType = property['roadType'];
+    _propertySize = property['propertySize']?.toDouble() ?? 0;
+    _kitchenCount = property['kitchenCount'] ?? 0;
+    _bathroomCount = property['bathroomCount'] ?? 0;
+    _bedroomCount = property['bedroomCount'] ?? 0;
+    _livingRoomCount = property['livingRoomCount'] ?? 0;
+
+    if (property['amenities'] != null) {
+      for (var key in _amenities.keys) {
+        _amenities[key] = property['amenities'].contains(key);
+      }
+    }
+  }
+
   Future<void> _savePropertyDetails() async {
     if (_formKey.currentState!.validate()) {
+      // Manual validation for required fields
+      if (_propertyNameController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Property name cannot be empty')),
+        );
+        return;
+      }
+
+      if (_selectedCity == null || _selectedCity!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a city')),
+        );
+        return;
+      }
+
+      if (_selectedCountry.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a country')),
+        );
+        return;
+      }
+
       final propertyDetails = {
         'token': widget.token,
-        'propertyName': _propertyNameController.text,
-        'address': _addressController.text,
+        'propertyName': _propertyNameController.text.trim(),
+        'address': _addressController.text.trim(),
         'country': _selectedCountry,
-        'city': _selectedCity,
-        'furnishing': _selectedFurnishing,
-        'type': _selectedType,
+        'city': _selectedCity ?? '',
+        'furnishing': _selectedFurnishing ?? '',
+        'type': _selectedType ?? '',
         'propertySize': _propertySize,
         'kitchenCount': _kitchenCount,
         'bathroomCount': _bathroomCount,
         'bedroomCount': _bedroomCount,
         'livingRoomCount': _livingRoomCount,
-        'roadType': _selectedRoadType,
+        'roadType': _selectedRoadType ?? '',
         'amenities': _amenities.entries
             .where((entry) => entry.value)
             .map((entry) => entry.key)
@@ -68,53 +120,56 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       };
 
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/property/saveProperty'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${widget.token}',
-          },
-          body: jsonEncode(propertyDetails),
-        );
+        final uri = widget.property == null
+            ? Uri.parse('http://localhost:3000/property/saveProperty')
+            : Uri.parse(
+                'http://localhost:3000/property/updateProperty/${widget.property!['_id']}');
 
-        if (response.statusCode == 201) {
-          // Add the property to the controller
-          Get.find<PropertiesController>().addProperty(propertyDetails);
+        final response = widget.property == null
+            ? await http.post(
+                uri,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ${widget.token}',
+                },
+                body: jsonEncode(propertyDetails),
+              )
+            : await http.put(
+                uri,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ${widget.token}',
+                },
+                body: jsonEncode(propertyDetails),
+              );
 
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          Get.find<PropertiesController>().fetchProperties();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Property saved successfully!')),
           );
 
-          // Navigate based on whether it's from sign-up or login
-          if (widget.isFromSignUp) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    TenantDetailsPage(token: widget.token, isFromSignUp: true),
-              ),
-            );
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LandlordDashboard(token: widget.token),
-              ),
-              (route) => false, // Remove all previous routes
-            );
-          }
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LandlordDashboard(token: widget.token),
+            ),
+            (route) => false,
+          );
         } else {
-          print('Failed to save property: ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Failed to save property')),
           );
         }
       } catch (error) {
-        print('Error: $error');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('An error occurred')),
         );
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete all required fields')),
+      );
     }
   }
 
@@ -190,7 +245,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    _selectedCity = value!;
+                    _selectedCity = value;
                   });
                 },
               ),
@@ -327,7 +382,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               if (widget.isFromSignUp)
                 TextButton(
                   onPressed: () {
-                    // Navigate to TenantDetailsPage if accessed during sign-up
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -346,7 +400,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               else
                 TextButton(
                   onPressed: () {
-                    // Navigate back to PropertiesPage if accessed after login
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -367,7 +420,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  // Custom widget for incrementing room count
   Widget _buildRoomCounter(
       String roomType, int roomCount, Function(int) onChanged) {
     return Row(
@@ -389,5 +441,14 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         ),
       ],
     );
+  }
+
+  bool validateAndSave() {
+    final form = _formKey.currentState;
+    if (form!.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
   }
 }
