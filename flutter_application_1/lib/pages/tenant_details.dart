@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
-import 'package:get/get.dart'; // Import Get
-import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.dart'; // Import the TenantController
+import 'package:get/get.dart';
+import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.dart';
 import 'rent_details.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -10,11 +10,13 @@ import 'package:http/http.dart' as http;
 class TenantDetailsPage extends StatefulWidget {
   final String token;
   final bool isFromSignUp;
+  final Map<String, dynamic>? tenant;
 
   const TenantDetailsPage({
     Key? key,
     required this.token,
     this.isFromSignUp = false,
+    this.tenant,
   }) : super(key: key);
 
   @override
@@ -30,7 +32,25 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
   final _leaseEndDateController = TextEditingController();
   final _rentAmountController = TextEditingController();
 
+  String? _selectedProperty;
+  List<dynamic> _properties = [];
+
   @override
+  void initState() {
+    super.initState();
+    _fetchProperties();
+    if (widget.tenant != null) {
+      _tenantNameController.text = widget.tenant!['tenantName'] ?? '';
+      _tenantEmailController.text = widget.tenant!['tenantEmail'] ?? '';
+      _tenantContactController.text =
+          widget.tenant!['tenantContactNumber'] ?? '';
+      _leaseStartDateController.text = widget.tenant!['leaseStartDate'] ?? '';
+      _leaseEndDateController.text = widget.tenant!['leaseEndDate'] ?? '';
+      _rentAmountController.text =
+          widget.tenant!['rentAmount']?.toString() ?? '';
+    }
+  }
+
   void dispose() {
     _tenantNameController.dispose();
     _tenantEmailController.dispose();
@@ -57,6 +77,8 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
 
   Future<void> _saveTenantDetails() async {
     if (_formKey.currentState!.validate()) {
+      FocusScope.of(context).unfocus(); // Remove focus before submitting
+
       final tenantDetails = {
         "tenantName": _tenantNameController.text,
         "tenantEmail": _tenantEmailController.text,
@@ -64,59 +86,101 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
         "leaseStartDate": _leaseStartDateController.text,
         "leaseEndDate": _leaseEndDateController.text,
         "rentAmount": double.tryParse(_rentAmountController.text) ?? 0,
+        "propertyId": _selectedProperty,
       };
 
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/tenant/saveTenant'),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer ${widget.token}",
-          },
-          body: jsonEncode(tenantDetails),
-        );
+        final uri = widget.tenant == null
+            ? Uri.parse('http://localhost:3000/tenant/saveTenant')
+            : Uri.parse(
+                'http://localhost:3000/tenant/updateTenant/${widget.tenant!['_id']}');
 
-        if (response.statusCode == 201) {
+        final response = widget.tenant == null
+            ? await http.post(
+                uri,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ${widget.token}',
+                },
+                body: jsonEncode(tenantDetails),
+              )
+            : await http.put(
+                uri,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ${widget.token}',
+                },
+                body: jsonEncode(tenantDetails),
+              );
+
+        if (response.statusCode == 201 || response.statusCode == 200) {
+          Get.find<TenantController>().fetchTenants();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Tenant details saved successfully!')),
+            const SnackBar(content: Text('Tenant saved successfully!')),
           );
 
-          // Add tenant to the controller
-          TenantController tenantController = Get.find();
-          tenantController.addTenant(tenantDetails);
-
-          if (widget.isFromSignUp) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    RentDetailsPage(token: widget.token, isFromSignUp: true),
-              ),
-            );
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LandlordDashboard(token: widget.token),
-              ),
-              (route) => false, // Remove all previous routes
-            );
-          }
-        } else if (response.statusCode == 401) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unauthorized. Please log in again.')),
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LandlordDashboard(token: widget.token),
+            ),
+            (route) => false,
           );
         } else {
-          final errorResponse = jsonDecode(response.body);
+          print('Failed to save tenant: ${response.body}');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${errorResponse['error']}')),
+            SnackBar(content: Text('Failed to save tenant: ${response.body}')),
           );
         }
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error occurred: $error')),
+          const SnackBar(content: Text('An error occurred')),
         );
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete all required fields')),
+      );
+    }
+  }
+
+  Future<void> _fetchProperties() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/property/getProperty'),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
+
+        if (responseData['status'] == true &&
+            responseData.containsKey('success')) {
+          setState(() {
+            _properties = responseData['success']; // Extracting the actual list
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Unexpected response format')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to fetch properties: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      print('Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('An error occurred while fetching properties')),
+      );
     }
   }
 
@@ -177,6 +241,35 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
                 label: 'Enter Rent Amount (NRS)',
                 keyboardType: TextInputType.number,
               ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedProperty,
+                decoration: InputDecoration(
+                  labelText: 'Select Property',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+                items: _properties.map((property) {
+                  return DropdownMenuItem<String>(
+                    value: property['_id'],
+                    child: Text(property['propertyName']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedProperty = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a property';
+                  }
+                  return null;
+                },
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _saveTenantDetails,
@@ -188,7 +281,7 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
                   ),
                 ),
                 child: const Text(
-                  'Save',
+                  'Save Tenant',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
@@ -196,7 +289,7 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
               if (widget.isFromSignUp)
                 TextButton(
                   onPressed: () {
-                    // Navigate to TenantDetailsPage if accessed during sign-up
+                    // Navigate to RentDetailsPage if accessed during sign-up
                     Navigator.push(
                       context,
                       MaterialPageRoute(

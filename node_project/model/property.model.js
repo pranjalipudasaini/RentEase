@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const propertySchema = new Schema({
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true }, // Fixed User reference & added index
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true }, 
     propertyName: { type: String, required: true },
     address: { type: String, required: true },
     country: { type: String, default: 'Nepal', required: true },

@@ -2,7 +2,9 @@ const RentServices = require('../services/rent.services');
 const UserService = require('../services/user.services');
 const jwt = require('jsonwebtoken');
 
-exports.saveRent = async (req, res) => {
+class RentController {
+
+  static async saveRent(req, res) {
   try {
     const rentData = req.body;
     
@@ -41,4 +43,99 @@ exports.saveRent = async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
-};
+}
+
+  // Get Rent Data
+  static async getRentData(req, res, next) {
+    try {
+        console.log("Headers received:", req.headers); // Debugging
+
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ success: false, message: "Authorization header is missing" });
+        }
+
+        const token = authHeader.split(" ")[1]; // Get token part after "Bearer"
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Authorization token is missing" });
+        }
+
+        console.log("Extracted Token:", token); // Debugging
+
+        const decodedToken = jwt.verify(token, "secretKey");
+        console.log("Decoded Token:", decodedToken); // Debugging
+
+        const userId = decodedToken._id;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Invalid token: user ID is missing" });
+        }
+
+        const properties = await RentServices.getRentData(userId);
+        res.json({ status: true, success: properties });
+    } catch (error) {
+        console.error("Error during token verification:", error); // Added logging
+        next(error);
+    }
+}
+
+// Delete Rent Handler
+static async deleteRentHandler(req, res) {
+    try {
+        const rentId = req.params.id;  // Ensure the ID is extracted correctly
+        console.log("Received Rent ID for deletion:", rentId); // Debugging log
+
+        if (!rentId) {
+            return res.status(400).json({ success: false, message: "Rent ID is required" });
+        }
+
+        const deletedRent = await RentServices.deleteRent(rentId);
+
+        if (!deletedRent) {
+            return res.status(404).json({ success: false, message: "Rent not found" });
+        }
+
+        res.json({ success: true, message: "Rent deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error deleting Rent: " + error.message });
+    }
+}
+
+// Update Rent Handler
+static async updateRentHandler(req, res) {
+    try {
+        const rentId = req.params.id;
+        const updateData = req.body;
+
+        // Check for duplicate Rent name during update
+        if (updateData.rentName) {
+            // Check if the rent name already exists in other properties (excluding the current rent)
+            const existingRent = await RentServices.getRentByName(updateData.rentName);
+            if (existingRent && existingRent._id !== rentId) {
+                return res.status(400).json({ success: false, message: "Rent name already exists" });
+            }
+        }
+
+        if (!rentId) {
+            return res.status(400).json({ success: false, message: "Rent ID is required" });
+        }
+
+        const updatedRent = await RentServices.updateRent(rentId, updateData);
+
+        if (!updatedRent) {
+            return res.status(404).json({ success: false, message: "Rent not found" });
+        }
+
+        res.json({
+            success: true,
+            message: "Rent updated successfully",
+            rent: updatedRent,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error updating rent: " + error.message });
+    }
+}
+}
+
+module.exports = RentController;
+
+

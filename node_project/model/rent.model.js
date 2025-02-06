@@ -1,7 +1,9 @@
 const db = require('../config/db');
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const rentSchema = new mongoose.Schema({
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     dueDate: { type: Date, required: true },
     otherCharges: { type: Number },
     lateFeeCharges: {
@@ -12,8 +14,8 @@ const rentSchema = new mongoose.Schema({
 });
 
 
-const rentModel = db.model('rent', rentSchema);
+const RentModel = db.model('Rent', rentSchema);
 
-module.exports = rentModel;
+module.exports = RentModel;
 
 
