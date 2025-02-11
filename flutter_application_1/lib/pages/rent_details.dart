@@ -10,11 +10,13 @@ import 'package:intl/intl.dart';
 class RentDetailsPage extends StatefulWidget {
   final String token;
   final bool isFromSignUp;
+  final Map<String, dynamic>? rent;
 
   const RentDetailsPage({
     Key? key,
     required this.token,
     this.isFromSignUp = false,
+    this.rent,
   }) : super(key: key);
 
   @override
@@ -27,8 +29,25 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
   final _otherChargesController = TextEditingController();
   final _lateFeeDaysController = TextEditingController();
   final _lateFeeAmountController = TextEditingController();
+  final _rentAmountController = TextEditingController();
+  final _leaseStartDateController = TextEditingController();
+  final _leaseEndDateController = TextEditingController();
 
   String _selectedRecurringDay = '1st';
+  String? _selectedTenant;
+  List<dynamic> _tenants = [];
+
+  @override
+  void dispose() {
+    _dueDateController.dispose();
+    _otherChargesController.dispose();
+    _lateFeeDaysController.dispose();
+    _lateFeeAmountController.dispose();
+    _rentAmountController.dispose();
+    _leaseStartDateController.dispose();
+    _leaseEndDateController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickDueDate() async {
     DateTime? pickedDate = await showDatePicker(
@@ -45,8 +64,52 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
     }
   }
 
+  Future<void> _fetchTenants() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/tenant/getTenant'),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      print("Response Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['status'] == true &&
+            responseData.containsKey('success')) {
+          setState(() {
+            _tenants = responseData[
+                'success']; // Fix: Use 'success' instead of 'tenants'
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Unexpected response format: ${response.body}')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch tenants: ${response.body}')),
+        );
+      }
+    } catch (error) {
+      print("Error fetching tenants: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error fetching tenants')),
+      );
+    }
+  }
+
+  bool _isSubmitting = false;
+
   Future<void> _saveRentDetails() async {
     if (_formKey.currentState!.validate()) {
+      if (_isSubmitting) return; // Prevent duplicate submissions
+      setState(() {
+        _isSubmitting = true;
+      });
+
       final rentDetails = {
         "dueDate": _dueDateController.text,
         "otherCharges": double.tryParse(_otherChargesController.text) ?? 0,
@@ -55,53 +118,111 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
           "amount": double.tryParse(_lateFeeAmountController.text) ?? 0,
         },
         "recurringDay": _selectedRecurringDay,
+        "tenantId": _selectedTenant,
       };
 
       try {
-        final response = await http.post(
-          Uri.parse('http://localhost:3000/rent/saveRent'),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer ${widget.token}",
-          },
-          body: jsonEncode(rentDetails),
-        );
+        final String apiUrl;
+        final bool isEditing = widget.rent != null;
 
-        if (response.statusCode == 201) {
-          // Update the RentController with the new rent data
-          RentController rentController = Get.find();
-          rentController.addRent(rentDetails);
+        if (isEditing) {
+          final String rentId = widget.rent!['_id'];
+          apiUrl = 'http://localhost:3000/rent/updateRent/$rentId';
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Rent details saved successfully!')),
+          final response = await http.put(
+            Uri.parse(apiUrl),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer ${widget.token}",
+            },
+            body: jsonEncode(rentDetails),
           );
 
-          if (widget.isFromSignUp) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LandlordDashboard(token: widget.token),
-              ),
+          if (response.statusCode == 200) {
+            RentController rentController = Get.find();
+            rentController.updateRent(rentId, rentDetails);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Rent details updated successfully!')),
             );
           } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LandlordDashboard(token: widget.token),
-              ),
-              (route) => false, // Remove all previous routes
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Failed to update rent: ${response.body}')),
             );
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save rent: ${response.body}')),
+          apiUrl = 'http://localhost:3000/rent/saveRent';
+
+          final response = await http.post(
+            Uri.parse(apiUrl),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer ${widget.token}",
+            },
+            body: jsonEncode(rentDetails),
           );
+
+          if (response.statusCode == 201) {
+            RentController rentController = Get.find();
+            rentController.addRent(rentDetails);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Rent details saved successfully!')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to save rent: ${response.body}')),
+            );
+          }
         }
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LandlordDashboard(token: widget.token),
+          ),
+          (route) => false,
+        );
       } catch (error) {
+        print("Error saving rent: $error");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error occurred: $error')),
         );
+      } finally {
+        setState(() {
+          _isSubmitting = false;
+        });
       }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTenants(); // Fetch tenants when page loads
+    _prefillRentDetails(); // Prefill if editing
+  }
+
+  void _prefillRentDetails() {
+    if (widget.rent != null) {
+      print("Prefilling rent details: ${widget.rent}");
+      setState(() {
+        _rentAmountController.text =
+            widget.rent?['rentAmount']?.toString() ?? '';
+        _leaseStartDateController.text = widget.rent?['leaseStartDate'] ?? '';
+        _leaseEndDateController.text = widget.rent?['leaseEndDate'] ?? '';
+        _dueDateController.text = widget.rent?['dueDate'] ?? '';
+        _otherChargesController.text =
+            widget.rent?['otherCharges']?.toString() ?? '';
+        _lateFeeDaysController.text =
+            widget.rent?['lateFeeCharges']?['days']?.toString() ?? '';
+        _lateFeeAmountController.text =
+            widget.rent?['lateFeeCharges']?['amount']?.toString() ?? '';
+        _selectedRecurringDay = widget.rent?['recurringDay'] ?? '1st';
+        _selectedTenant = widget.rent?['tenantId'];
+      });
+    } else {
+      print("No rent details to prefill.");
     }
   }
 
@@ -198,6 +319,35 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
                 },
               ),
               const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedTenant,
+                decoration: InputDecoration(
+                  labelText: 'Select Tenant',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                ),
+                items: _tenants.map((tenant) {
+                  return DropdownMenuItem<String>(
+                    value: tenant['_id'],
+                    child: Text(tenant['tenantName']),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTenant = value;
+                    _prefillRentDetails();
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a tenant';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _saveRentDetails,
                 style: ElevatedButton.styleFrom(
@@ -213,7 +363,6 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
               if (widget.isFromSignUp)
                 TextButton(
                   onPressed: () {
-                    // Navigate to TenantDetailsPage if accessed during sign-up
                     Navigator.push(
                       context,
                       MaterialPageRoute(

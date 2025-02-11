@@ -11,6 +11,7 @@ const rentSchema = new mongoose.Schema({
       amount: { type: Number },
     },
     recurringDay: { type: String, enum: ['1st', '2nd', '3rd', '4th', '5th'], required: true },
+    tenantId: { type: Schema.Types.ObjectId, ref: 'Tenant', required: true } 
 });
 
 

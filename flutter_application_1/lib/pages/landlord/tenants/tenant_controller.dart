@@ -11,13 +11,13 @@ class TenantController extends GetxController {
   void onInit() {
     super.onInit();
     token = Get.find<AuthService>().token;
-    _loadTenants();
+    fetchTenants();
   }
 
-  void _loadTenants() async {
+  Future<String> fetchPropertyName(String propertyId) async {
     try {
       var response = await http.get(
-        Uri.parse('http://localhost:3000/tenants/getTenants'),
+        Uri.parse('http://localhost:3000/property/getProperty/$propertyId'),
         headers: {
           'Authorization': 'Bearer ${token.value}',
         },
@@ -25,12 +25,14 @@ class TenantController extends GetxController {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        tenants.value = List<Map<String, dynamic>>.from(data);
+        return data['propertyName'] ?? 'Unknown Property';
       } else {
-        print("Failed to load tenants: ${response.statusCode}");
+        print("Failed to load property name: ${response.statusCode}");
+        return 'Unknown Property';
       }
     } catch (e) {
-      print("Error loading tenants: $e");
+      print("Error fetching property name: $e");
+      return 'Unknown Property';
     }
   }
 

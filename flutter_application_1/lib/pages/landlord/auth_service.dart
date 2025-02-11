@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService extends GetxService {
-  var token = ''.obs;
+  RxString token = ''.obs;
 
   Future<AuthService> init() async {
     await _loadToken();

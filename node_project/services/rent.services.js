@@ -1,9 +1,9 @@
-const Rent = require('../model/rent.model');
+const RentModel = require('../model/rent.model'); 
 
 class RentServices {
   static async createRent(RentData) {
     try {
-      const rent = new Rent(RentData);
+      const rent = new RentModel(RentData);
         
         const savedRent = await rent.save();
         
