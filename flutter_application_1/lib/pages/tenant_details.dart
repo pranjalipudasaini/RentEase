@@ -39,6 +39,7 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
   void initState() {
     super.initState();
     _fetchProperties();
+
     if (widget.tenant != null) {
       _tenantNameController.text = widget.tenant!['tenantName'] ?? '';
       _tenantEmailController.text = widget.tenant!['tenantEmail'] ?? '';
@@ -48,6 +49,8 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
       _leaseEndDateController.text = widget.tenant!['leaseEndDate'] ?? '';
       _rentAmountController.text =
           widget.tenant!['rentAmount']?.toString() ?? '';
+      _selectedProperty =
+          widget.tenant!['propertyId']; // Set property if editing
     }
   }
 
@@ -153,16 +156,20 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
         },
       );
 
-      print('Response Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
 
         if (responseData['status'] == true &&
             responseData.containsKey('success')) {
           setState(() {
-            _properties = responseData['success']; // Extracting the actual list
+            _properties = responseData['success'];
+
+            // Ensure the selected property is valid
+            if (_selectedProperty != null &&
+                !_properties
+                    .any((property) => property['_id'] == _selectedProperty)) {
+              _selectedProperty = null;
+            }
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -176,7 +183,6 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
         );
       }
     } catch (error) {
-      print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('An error occurred while fetching properties')),

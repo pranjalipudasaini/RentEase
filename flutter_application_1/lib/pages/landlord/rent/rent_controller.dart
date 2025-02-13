@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/pages/landlord/auth_service.dart';
 import 'package:http/http.dart' as http;
@@ -78,8 +77,6 @@ class RentController extends GetxController {
         return;
       }
 
-      print("Fetching rents with token: '${token.value}'");
-
       final response = await http.get(
         Uri.parse('http://localhost:3000/rent/getRent'),
         headers: {
@@ -88,8 +85,6 @@ class RentController extends GetxController {
         },
       );
 
-      print("Response: ${response.body}");
-
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
 
@@ -97,23 +92,34 @@ class RentController extends GetxController {
             jsonResponse['status'] == true) {
           if (jsonResponse.containsKey('success') &&
               jsonResponse['success'] is List) {
-            rents.value =
+            List<Map<String, dynamic>> fetchedRents =
                 List<Map<String, dynamic>>.from(jsonResponse['success']);
+
+            // Fetch tenant names and update the rents list
+            for (var rent in fetchedRents) {
+              if (rent.containsKey('tenantId') && rent['tenantId'] != null) {
+                String tenantName = await fetchTenantName(rent['tenantId']);
+                rent['tenantName'] = tenantName; // Update rent with tenant name
+              } else {
+                rent['tenantName'] =
+                    'Unknown Tenant'; // Fallback if tenantId is missing
+              }
+            }
+
+            rents.clear();
+            rents.addAll(fetchedRents);
           } else {
             print("Unexpected API response format: $jsonResponse");
             Get.snackbar('Error', 'Invalid rent data format received');
           }
         } else {
-          print("Failed to fetch rents: ${jsonResponse}");
           Get.snackbar('Error',
               'Failed to fetch rents: ${jsonResponse['message'] ?? 'Unknown error'}');
         }
       } else {
-        print("Error fetching rents: ${response.body}");
         Get.snackbar('Error', 'Failed to fetch rents: ${response.statusCode}');
       }
     } catch (e) {
-      print("Exception fetching rents: $e");
       Get.snackbar('Error', 'Something went wrong: $e');
     }
   }
@@ -130,10 +136,21 @@ class RentController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        fetchRents(); // Refresh the list
+        var jsonResponse = jsonDecode(response.body);
+
+        if (jsonResponse.containsKey('rent')) {
+          var updatedRent = jsonResponse['rent'];
+          int index = rents.indexWhere((rent) => rent['_id'] == rentId);
+          if (index != -1) {
+            rents[index] = updatedRent;
+            rents.refresh();
+          } else {
+            rents.add(updatedRent);
+          }
+        }
         Get.snackbar("Success", "Rent updated successfully");
       } else {
-        Get.snackbar("Error", "Failed to update rent");
+        Get.snackbar("Error", "Failed to update rent: ${response.body}");
       }
     } catch (e) {
       Get.snackbar("Error", "Error updating rent: $e");

@@ -59,7 +59,7 @@ class RentPage extends GetView<RentController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      rent['tenantName'] ?? 'Unnamed Tenant',
+                      'Rent for ${rent['tenantName'] ?? 'Unnamed Tenant'}',
                       style: const TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
@@ -67,12 +67,7 @@ class RentPage extends GetView<RentController> {
                     ),
                     const SizedBox(height: 8.0),
                     Text(
-                      rent['dueDate'] != null
-                          ? DateTime.parse(rent['dueDate'])
-                              .toLocal()
-                              .toString()
-                              .split(' ')[0]
-                          : 'No due date provided',
+                      'Rent for ${rent['dueDate'] != null ? DateTime.parse(rent['dueDate']).toLocal().toString().split(' ')[0] : 'No due date provided'}',
                       style: const TextStyle(
                         fontSize: 14.0,
                         color: Colors.grey,

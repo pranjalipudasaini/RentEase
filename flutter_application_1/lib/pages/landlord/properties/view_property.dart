@@ -116,19 +116,19 @@ class ViewPropertyPage extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Kitchens: ${property['kitchenCount'] ?? 0}',
+              'Kitchens: ${property['specifications']?['kitchens'] ?? 0}',
               style: const TextStyle(fontSize: 16.0),
             ),
             Text(
-              'Bathrooms: ${property['bathroomCount'] ?? 0}',
+              'Bathrooms: ${property['specifications']?['bathrooms'] ?? 0}',
               style: const TextStyle(fontSize: 16.0),
             ),
             Text(
-              'Bedrooms: ${property['bedroomCount'] ?? 0}',
+              'Bedrooms: ${property['specifications']?['bedrooms'] ?? 0}',
               style: const TextStyle(fontSize: 16.0),
             ),
             Text(
-              'Living Rooms: ${property['livingRoomCount'] ?? 0}',
+              'Living Rooms: ${property['specifications']?['livingRooms'] ?? 0}',
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 16.0),

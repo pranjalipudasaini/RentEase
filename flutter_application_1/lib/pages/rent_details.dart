@@ -123,10 +123,18 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
 
       try {
         final String apiUrl;
-        final bool isEditing = widget.rent != null;
+        final bool isEditing =
+            widget.rent != null && widget.rent!.containsKey('_id');
 
         if (isEditing) {
-          final String rentId = widget.rent!['_id'];
+          final String? rentId = widget.rent?['_id'];
+          if (isEditing && rentId == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: Rent ID is missing')),
+            );
+            return;
+          }
+
           apiUrl = 'http://localhost:3000/rent/updateRent/$rentId';
 
           final response = await http.put(
@@ -140,7 +148,7 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
 
           if (response.statusCode == 200) {
             RentController rentController = Get.find();
-            rentController.updateRent(rentId, rentDetails);
+            rentController.updateRent(rentId!, rentDetails);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Rent details updated successfully!')),

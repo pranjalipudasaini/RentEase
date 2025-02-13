@@ -1,5 +1,6 @@
 const TenantServices = require('../services/tenant.services');
 const UserService = require('../services/user.services');
+const PropertyModel = require('../model/property.model'); // Import Property Model
 const jwt = require('jsonwebtoken');
 
 class TenantController {
@@ -7,45 +8,44 @@ class TenantController {
   static async saveTenant(req, res) {
     try {
         console.log("Received tenant data:", req.body);
-      const tenantData = req.body;
-  
-      // Extract token from Authorization header
-      const token = req.headers.authorization?.split(" ")[1]; // "Bearer token_value"
-  
-      if (!token) {
-        throw new Error('Authorization token is missing');
-      }
-      const decodedToken = jwt.verify(token, 'secretKey');
-      
-      const user = await UserService.findUserByEmail(decodedToken.email);
-      if (!user) {
-        throw new Error('User not found');
-      }
-  
-      // Add userId to tenant data before saving
-      tenantData.userId = user._id;
-  
-      // Create the tenant with the userId attached
-      const tenant = await TenantServices.createTenant(tenantData);
-  
-      // Generate a new token for the user (optional, you may already have the token)
-      const tokenData = { _id: user._id, email: user.email, role: user.role };
-      const newToken = await UserService.generateToken(tokenData, 'secretKey', '1h');
-      if (!newToken) {
-        throw new Error('Failed to generate token');
-      }
-  
-      res.status(201).json({
-        success: true,
-        message: 'Tenant saved successfully',
-        tenant,
-        token: newToken, // Send back the new token if needed
-      });
+        const tenantData = req.body;
+
+        // Extract token from Authorization header
+        const token = req.headers.authorization?.split(" ")[1]; // "Bearer token_value"
+
+        if (!token) {
+            throw new Error('Authorization token is missing');
+        }
+        const decodedToken = jwt.verify(token, 'secretKey');
+
+        const user = await UserService.findUserByEmail(decodedToken.email);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Add userId to tenant data before saving
+        tenantData.userId = user._id;
+
+        // Fetch property details to get property name
+        const property = await PropertyModel.findById(tenantData.propertyId);
+        if (!property) {
+            throw new Error('Property not found');
+        }
+
+        tenantData.propertyName = property.propertyName;
+
+        // Create the tenant with the userId and propertyName attached
+        const tenant = await TenantServices.createTenant(tenantData);
+
+        res.status(201).json({
+            success: true,
+            message: 'Tenant saved successfully',
+            tenant
+        });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
   }
-  
 
   // Get Tenant Data
   static async getTenantData(req, res, next) {

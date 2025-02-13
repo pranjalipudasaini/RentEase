@@ -420,22 +420,31 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  Widget _buildRoomCounter(
-      String roomType, int roomCount, Function(int) onChanged) {
+  Widget _buildRoomCounter(String label, int count, Function(int) onChanged) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(roomType),
+        Text(label),
         Row(
           children: [
             IconButton(
               icon: const Icon(Icons.remove),
-              onPressed: roomCount > 0 ? () => onChanged(roomCount - 1) : null,
+              onPressed: () {
+                if (count > 0) {
+                  setState(() {
+                    onChanged(count - 1);
+                  });
+                }
+              },
             ),
-            Text('$roomCount'),
+            Text(count.toString()),
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: () => onChanged(roomCount + 1),
+              onPressed: () {
+                setState(() {
+                  onChanged(count + 1);
+                });
+              },
             ),
           ],
         ),

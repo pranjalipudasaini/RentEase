@@ -10,7 +10,8 @@ const tenantSchema = new mongoose.Schema({
   leaseStartDate: { type: Date, required: true },
   leaseEndDate: { type: Date, required: true },
   rentAmount: { type: Number, required: true },
-  propertyId: { type: Schema.Types.ObjectId, ref: 'Property', required: true } // Added propertyId field
+  propertyId: { type: Schema.Types.ObjectId, ref: 'Property', required: true }, 
+  propertyName: { type: String }
 });
 
 const TenantModel = db.model('Tenant', tenantSchema);

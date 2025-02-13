@@ -68,7 +68,7 @@ class ViewRentsPage extends StatelessWidget {
         child: ListView(
           children: [
             Text(
-              'Rent Name: ${rent['rentName'] ?? 'Unnamed Rent'}',
+              'Tenant Name: ${rent['tenantName'] ?? 'Unnamed Tenant'}',
               style:
                   const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
             ),

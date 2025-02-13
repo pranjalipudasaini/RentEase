@@ -1,5 +1,6 @@
 const RentServices = require('../services/rent.services');
 const UserService = require('../services/user.services');
+const TenantModel = require('../model/tenant.model');
 const jwt = require('jsonwebtoken');
 
 class RentController {
@@ -71,6 +72,15 @@ class RentController {
         if (!userId) {
             return res.status(401).json({ success: false, message: "Invalid token: user ID is missing" });
         }
+
+        // Fetch tenant details to get property name
+        const tenant = await TenantModel.findById(rentData.tenantId);
+        if (!tenant) {
+            throw new Error('Tenant not found');
+        }
+
+        rentData.tenantName = tenant.tenantName;
+
 
         const rents = await RentServices.getRentData(userId);
         
