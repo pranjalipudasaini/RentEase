@@ -36,6 +36,39 @@ class RentController extends GetxController {
     }
   }
 
+  void fetchRents() async {
+    try {
+      if (token.value.isEmpty) {
+        Get.snackbar('Error', 'Token is missing, unable to fetch rents');
+        return;
+      }
+
+      print("Authorization Token Before Request: '${token.value}'");
+
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/rent/getRent'),
+        headers: {
+          'Authorization': 'Bearer ${token.value}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        if (jsonResponse['status'] == true) {
+          // Validate and filter out rents with missing data
+          rents.value = List<Map<String, dynamic>>.from(jsonResponse['success']
+              .where(
+                  (rent) => rent['_id'] != null && rent['rentName'] != null));
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to fetch rents: ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Something went wrong: $e');
+    }
+  }
+
   void addRent(Map<String, dynamic> rentData) async {
     try {
       if (token.value.isEmpty) {
@@ -67,60 +100,6 @@ class RentController extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", "Error adding rent: $e");
-    }
-  }
-
-  void fetchRents() async {
-    try {
-      if (token.value.isEmpty) {
-        Get.snackbar('Error', 'Token is missing, unable to fetch rents');
-        return;
-      }
-
-      final response = await http.get(
-        Uri.parse('http://localhost:3000/rent/getRent'),
-        headers: {
-          'Authorization': 'Bearer ${token.value}',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-
-        if (jsonResponse is Map<String, dynamic> &&
-            jsonResponse['status'] == true) {
-          if (jsonResponse.containsKey('success') &&
-              jsonResponse['success'] is List) {
-            List<Map<String, dynamic>> fetchedRents =
-                List<Map<String, dynamic>>.from(jsonResponse['success']);
-
-            // Fetch tenant names and update the rents list
-            for (var rent in fetchedRents) {
-              if (rent.containsKey('tenantId') && rent['tenantId'] != null) {
-                String tenantName = await fetchTenantName(rent['tenantId']);
-                rent['tenantName'] = tenantName; // Update rent with tenant name
-              } else {
-                rent['tenantName'] =
-                    'Unknown Tenant'; // Fallback if tenantId is missing
-              }
-            }
-
-            rents.clear();
-            rents.addAll(fetchedRents);
-          } else {
-            print("Unexpected API response format: $jsonResponse");
-            Get.snackbar('Error', 'Invalid rent data format received');
-          }
-        } else {
-          Get.snackbar('Error',
-              'Failed to fetch rents: ${jsonResponse['message'] ?? 'Unknown error'}');
-        }
-      } else {
-        Get.snackbar('Error', 'Failed to fetch rents: ${response.statusCode}');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Something went wrong: $e');
     }
   }
 
