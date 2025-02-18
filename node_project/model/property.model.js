@@ -15,13 +15,22 @@ const propertySchema = new Schema({
     },
     furnishing: { type: String, enum: ['Furnished', 'Unfurnished', 'Semi-Furnished'], default: 'Furnished' },
     roadType: { type: String, default: 'Paved' }, // Moved roadType outside specifications
+    type: { 
+        type: String,
+        required: true,
+        enum: ['Apartment', 'House', 'Condo', 'Land'],
+        default: 'Apartment', }, // Added default value
     size: { type: Number, default: 0 }, // Added default value
     specifications: {
-        bathrooms: { type: Number, default: 0 },
-        kitchens: { type: Number, default: 0 },
-        bedrooms: { type: Number, default: 0 },
-        livingRooms: { type: Number, default: 0 },
+        type: new Schema({
+            bathrooms: { type: Number, default: 0 },
+            kitchens: { type: Number, default: 0 },
+            bedrooms: { type: Number, default: 0 },
+            livingRooms: { type: Number, default: 0 },
+        }, { _id: false }), 
+        default: {} 
     },
+    
     amenities: {
         type: [String],
         validate: {
@@ -32,6 +41,8 @@ const propertySchema = new Schema({
             message: 'Invalid amenity value!',
         },
     },
+    images: { type: String, default: '' }, // Added image field
+    isAvailable: { type: Boolean, default: true },
 }, { timestamps: true }); // Added timestamps for createdAt & updatedAt
 
 const PropertyModel = db.model('Property', propertySchema);

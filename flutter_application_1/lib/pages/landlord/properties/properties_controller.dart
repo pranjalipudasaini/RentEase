@@ -4,8 +4,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PropertiesController extends GetxController {
-  var properties = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> properties = <Map<String, dynamic>>[].obs;
   late final RxString token;
+
+  void markAsAvailable(int index) {
+    properties[index]['available'] = !(properties[index]['available'] ?? false);
+    properties.refresh();
+  }
 
   @override
   void onInit() {
@@ -153,6 +158,41 @@ class PropertiesController extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", "Error deleting property: $e");
+    }
+  }
+
+  void toggleAvailability(String propertyId, bool currentStatus) async {
+    try {
+      // Optimistically update UI first
+      int index = properties.indexWhere((p) => p['_id'] == propertyId);
+      if (index != -1) {
+        properties[index]['isAvailable'] = !currentStatus;
+        properties.refresh(); // Ensures UI updates immediately
+      }
+
+      final response = await http.patch(
+        Uri.parse(
+            'http://localhost:3000/property/toggleAvailability/$propertyId'),
+        headers: {
+          'Authorization': 'Bearer ${token.value}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        fetchProperties(); // Refresh the list after successful update
+        Get.snackbar("Success", "Property availability updated");
+      } else {
+        // If the API call fails, revert the UI update
+        if (index != -1) {
+          properties[index]['isAvailable'] = currentStatus;
+          properties.refresh();
+        }
+        Get.snackbar(
+            "Error", "Failed to update availability: ${response.body}");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong: $e");
     }
   }
 }

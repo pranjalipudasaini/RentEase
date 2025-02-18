@@ -106,7 +106,7 @@ class ViewPropertyPage extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Size: ${property['propertySize']?.toStringAsFixed(2) ?? 'No size provided'} sq.ft.',
+              'Size: ${property['size']?.toStringAsFixed(2) ?? 'No size provided'} sq.ft.',
               style: const TextStyle(fontSize: 16.0),
             ),
             const SizedBox(height: 8.0),

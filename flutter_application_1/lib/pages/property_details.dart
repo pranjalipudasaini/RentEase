@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
 import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
 import 'package:flutter_application_1/pages/tenant_details.dart';
@@ -28,13 +27,13 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final _formKey = GlobalKey<FormState>();
   final _propertyNameController = TextEditingController();
   final _addressController = TextEditingController();
+  final _propertySizeController = TextEditingController();
 
   String _selectedCountry = 'Nepal';
   String? _selectedCity;
   String? _selectedFurnishing;
   String? _selectedType;
   String? _selectedRoadType;
-  double _propertySize = 0;
   Map<String, bool> _amenities = {
     'Parking': false,
     'WiFi': false,
@@ -62,11 +61,13 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     _selectedFurnishing = property['furnishing'];
     _selectedType = property['type'];
     _selectedRoadType = property['roadType'];
-    _propertySize = property['propertySize']?.toDouble() ?? 0;
-    _kitchenCount = property['kitchenCount'] ?? 0;
-    _bathroomCount = property['bathroomCount'] ?? 0;
-    _bedroomCount = property['bedroomCount'] ?? 0;
-    _livingRoomCount = property['livingRoomCount'] ?? 0;
+    _propertySizeController.text = property['size']?.toString() ?? '0';
+
+    final specifications = property['specifications'] ?? {};
+    _kitchenCount = specifications['kitchens'] ?? 0;
+    _bathroomCount = specifications['bathrooms'] ?? 0;
+    _bedroomCount = specifications['bedrooms'] ?? 0;
+    _livingRoomCount = specifications['livingRooms'] ?? 0;
 
     if (property['amenities'] != null) {
       for (var key in _amenities.keys) {
@@ -107,11 +108,13 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         'city': _selectedCity ?? '',
         'furnishing': _selectedFurnishing ?? '',
         'type': _selectedType ?? '',
-        'propertySize': _propertySize,
-        'kitchenCount': _kitchenCount,
-        'bathroomCount': _bathroomCount,
-        'bedroomCount': _bedroomCount,
-        'livingRoomCount': _livingRoomCount,
+        'size': double.tryParse(_propertySizeController.text) ?? 0,
+        'specifications': {
+          'kitchens': _kitchenCount,
+          'bathrooms': _bathroomCount,
+          'bedrooms': _bedroomCount,
+          'livingRooms': _livingRoomCount,
+        },
         'roadType': _selectedRoadType ?? '',
         'amenities': _amenities.entries
             .where((entry) => entry.value)
@@ -272,13 +275,9 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                controller: _propertySizeController,
                 decoration: const InputDecoration(labelText: 'Size (sq.ft.)'),
                 keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  setState(() {
-                    _propertySize = double.tryParse(value) ?? 0;
-                  });
-                },
               ),
               const SizedBox(height: 16),
               const Text(

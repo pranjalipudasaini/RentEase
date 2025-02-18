@@ -27,6 +27,9 @@ class PropertiesPage extends GetView<PropertiesController> {
           itemCount: propertyController.properties.length,
           itemBuilder: (context, index) {
             final property = propertyController.properties[index];
+            final bool isAvailable = property['isAvailable'] ??
+                false; // Default to false if not provided
+
             return GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -76,54 +79,78 @@ class PropertiesPage extends GetView<PropertiesController> {
                     ),
                     const SizedBox(height: 12.0),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                        // Mark as Available/Unavailable Button
+                        TextButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PropertyDetailsPage(
-                                  token: propertyController.token.value,
-                                  property:
-                                      property, // Pass the property for editing
-                                ),
-                              ),
-                            );
+                            propertyController.toggleAvailability(
+                                property['_id'], isAvailable);
                           },
+                          child: Text(
+                            isAvailable
+                                ? "Mark as Unavailable"
+                                : "Mark as Available",
+                            style: TextStyle(
+                              color: isAvailable ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Delete Property"),
-                                content: const Text(
-                                    "Are you sure you want to delete this property?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text("Cancel"),
+
+                        // Edit and Delete Buttons
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PropertyDetailsPage(
+                                      token: propertyController.token.value,
+                                      property: property,
+                                    ),
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      propertyController.deleteProperty(index);
-                                      Navigator.pop(context);
-                                    },
-                                    child: const Text("Delete",
-                                        style: TextStyle(color: Colors.red)),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Delete Property"),
+                                    content: const Text(
+                                        "Are you sure you want to delete this property?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          propertyController
+                                              .deleteProperty(index);
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text(
+                                          "Delete",
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -136,11 +163,11 @@ class PropertiesPage extends GetView<PropertiesController> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  PropertyDetailsPage(token: propertyController.token.value),
+              builder: (context) => PropertyDetailsPage(
+                token: propertyController.token.value,
+              ),
             ),
           );
-
           propertyController.fetchProperties();
         },
         child: Icon(Icons.add),

@@ -167,6 +167,16 @@ class PropertyController {
             res.status(500).json({ success: false, message: "Error updating property: " + error.message });
         }
     }
+
+    static async toggle_availability(req, res) {
+        try {
+            const result = await PropertyServices.toggleAvailability(req.params.id);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ message: 'Server error', error: error.message });
+        }
+    }
+    
 }
 
 module.exports = PropertyController;
