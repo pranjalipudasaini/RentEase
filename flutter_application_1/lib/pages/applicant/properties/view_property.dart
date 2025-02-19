@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord/properties/properties_controller.dart';
-import 'package:flutter_application_1/pages/property_details.dart';
+import 'package:flutter_application_1/pages/applicant/properties/properties_controller.dart';
 import 'package:get/get.dart';
 
-class ViewPropertyPage extends StatelessWidget {
-  final PropertiesController propertyController =
-      Get.put(PropertiesController());
+class ApplicantViewPropertyPage extends StatelessWidget {
+  final ApplicantPropertiesController propertyController =
+      Get.put(ApplicantPropertiesController());
   final Map<String, dynamic> property;
 
-  ViewPropertyPage({Key? key, required this.property}) : super(key: key);
+  ApplicantViewPropertyPage({Key? key, required this.property})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,52 +21,6 @@ class ViewPropertyPage extends StatelessWidget {
         title: Text(property['propertyName'] ?? 'Property Details',
             style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF062356),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PropertyDetailsPage(
-                    token: propertyController.token.value,
-                    property: property,
-                  ),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Delete Property"),
-                  content: const Text(
-                      "Are you sure you want to delete this property?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Cancel"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        // Logic to delete the property
-                        Navigator.pop(context);
-                        Navigator.pop(context); // Go back to the previous page
-                      },
-                      child: const Text("Delete",
-                          style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -14,6 +14,9 @@ class ViewRentsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
         title: Text(rent['rentName'] ?? 'Rent Details',
             style: const TextStyle(color: Colors.white)),
         backgroundColor: const Color(0xFF062356),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/applicant/home/home_controller.dart';
+import 'package:flutter_application_1/pages/applicant/properties/properties_controller.dart';
 import 'package:flutter_application_1/pages/landlord/auth_service.dart';
 import 'package:flutter_application_1/pages/landlord/home/home_controller.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
@@ -18,6 +20,8 @@ void main() async {
   Get.put(PropertiesController());
   Get.put(TenantController());
   Get.put(RentController());
+  Get.put(ApplicantHomeController());
+  Get.put(ApplicantPropertiesController());
   // Run the app
   runApp(const MyApp());
 }

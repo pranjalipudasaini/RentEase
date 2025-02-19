@@ -177,6 +177,15 @@ class PropertyController {
         }
     }
     
+    static async getAvailableProperties(req, res) {
+        try {
+            const properties = await PropertyServices.getAvailableProperties();
+            res.json({ success: true, properties });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    
 }
 
 module.exports = PropertyController;

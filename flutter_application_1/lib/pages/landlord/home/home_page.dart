@@ -21,17 +21,6 @@ class HomePage extends GetView<HomeController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Text(
-                'Welcome to the Landlord Dashboard, $email!',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
             _buildSectionHeader(context, "My Properties", 1),
             _buildPropertyList(),
             _buildSectionHeader(context, "My Tenants", 2),

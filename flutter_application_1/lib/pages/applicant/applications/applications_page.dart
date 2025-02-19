@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/landlord/profile/profile_controller.dart';
+import 'package:flutter_application_1/pages/applicant/applications/applications_controller.dart';
 import 'package:get/get.dart';
 
-class ProfilePage extends GetView<ProfileController> {
+class ApplicationsPage extends GetView<ApplicationsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,7 +10,7 @@ class ProfilePage extends GetView<ProfileController> {
       body: Container(
         child: Center(
           child: Text(
-            "Profile Page",
+            "Applications Page",
             style: TextStyle(fontSize: 20),
           ),
         ),

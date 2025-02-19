@@ -56,6 +56,16 @@ class PropertyServices {
             throw new Error("Error toggling property availability: " + error.message);
         }
     }
+
+    static async getAvailableProperties() {
+        try {
+            const properties = await PropertyModel.find({ isAvailable: true });
+            return properties;
+        } catch (error) {
+            throw new Error("Error fetching available properties: " + error.message);
+        }
+    }
+    
     
 }
 
