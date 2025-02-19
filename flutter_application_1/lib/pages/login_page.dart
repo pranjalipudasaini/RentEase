@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
-import 'package:flutter_application_1/pages/tenant_dashboard.dart';
+import 'package:flutter_application_1/pages/applicant/tenant_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';

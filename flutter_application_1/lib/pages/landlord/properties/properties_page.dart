@@ -11,13 +11,16 @@ class PropertiesPage extends GetView<PropertiesController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: Obx(() {
         if (propertyController.properties.isEmpty) {
           return Center(
             child: TextButton(
               onPressed: propertyController.fetchProperties,
               child: const Text("No properties found. Tap to retry."),
+              style: TextButton.styleFrom(
+                foregroundColor: Color(0xFF062356),
+              ),
             ),
           );
         }
@@ -27,8 +30,7 @@ class PropertiesPage extends GetView<PropertiesController> {
           itemCount: propertyController.properties.length,
           itemBuilder: (context, index) {
             final property = propertyController.properties[index];
-            final bool isAvailable = property['isAvailable'] ??
-                false; // Default to false if not provided
+            final bool isAvailable = property['isAvailable'] ?? false;
 
             return GestureDetector(
               onTap: () {
@@ -67,6 +69,7 @@ class PropertiesPage extends GetView<PropertiesController> {
                       style: const TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF062356),
                       ),
                     ),
                     const SizedBox(height: 8.0),
@@ -81,7 +84,6 @@ class PropertiesPage extends GetView<PropertiesController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Mark as Available/Unavailable Button
                         TextButton(
                           onPressed: () {
                             propertyController.toggleAvailability(
@@ -92,17 +94,18 @@ class PropertiesPage extends GetView<PropertiesController> {
                                 ? "Mark as Unavailable"
                                 : "Mark as Available",
                             style: TextStyle(
-                              color: isAvailable ? Colors.red : Colors.green,
+                              color: isAvailable
+                                  ? Color(0xFFF2B138)
+                                  : Color(0xFF0FA3B1),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-
-                        // Edit and Delete Buttons
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              icon: const Icon(Icons.edit,
+                                  color: Color(0xFF062356)),
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -170,8 +173,11 @@ class PropertiesPage extends GetView<PropertiesController> {
           );
           propertyController.fetchProperties();
         },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Color(0xFF062356),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
       ),
     );
   }

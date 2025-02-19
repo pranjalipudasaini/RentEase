@@ -31,9 +31,10 @@ class LandlordDashboard extends StatelessWidget {
               children: controller.pages,
             ),
             bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Colors.white,
               currentIndex: controller.selectedIndex,
               onTap: controller.onTabTapped,
-              selectedItemColor: Colors.blue,
+              selectedItemColor: Color(0xFF062356),
               unselectedItemColor: Colors.black,
               items: const [
                 BottomNavigationBarItem(

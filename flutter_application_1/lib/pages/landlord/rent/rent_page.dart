@@ -16,7 +16,10 @@ class RentPage extends GetView<RentController> {
           return Center(
             child: TextButton(
               onPressed: rentController.fetchRents,
-              child: const Text("No rents found. Tap to retry."),
+              child: const Text(
+                "No rents found. Tap to retry.",
+                style: TextStyle(color: Color(0xFF062356)),
+              ),
             ),
           );
         }
@@ -63,6 +66,7 @@ class RentPage extends GetView<RentController> {
                       style: const TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF062356),
                       ),
                     ),
                     const SizedBox(height: 8.0),
@@ -78,7 +82,8 @@ class RentPage extends GetView<RentController> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon:
+                              const Icon(Icons.edit, color: Color(0xFF062356)),
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -97,15 +102,22 @@ class RentPage extends GetView<RentController> {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: const Text("Delete Rent"),
+                                title: const Text(
+                                  "Delete Rent",
+                                  style: TextStyle(color: Color(0xFF062356)),
+                                ),
                                 content: const Text(
-                                    "Are you sure you want to delete this rent?"),
+                                  "Are you sure you want to delete this rent?",
+                                  style: TextStyle(color: Color(0xFF4A78C9)),
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: const Text("Cancel"),
+                                    child: const Text("Cancel",
+                                        style: TextStyle(
+                                            color: Color(0xFF062356))),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -113,7 +125,8 @@ class RentPage extends GetView<RentController> {
                                       Navigator.pop(context);
                                     },
                                     child: const Text("Delete",
-                                        style: TextStyle(color: Colors.red)),
+                                        style: TextStyle(
+                                            color: Color(0xFFF2B138))),
                                   ),
                                 ],
                               ),
@@ -142,8 +155,11 @@ class RentPage extends GetView<RentController> {
           );
           rentController.fetchRents();
         },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
+        child: Icon(Icons.add, color: Colors.white),
+        backgroundColor: Color(0xFF062356),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
       ),
     );
   }
