@@ -186,6 +186,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: HexColor("062356"),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -374,8 +375,15 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               }),
               const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HexColor("062356"), // Background color
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
                 onPressed: _savePropertyDetails,
-                child: const Text('Save Property'),
+                child: const Text(
+                  'Save Property',
+                  style: TextStyle(color: Colors.white), // White text color
+                ),
               ),
               const SizedBox(height: 16),
               if (widget.isFromSignUp)

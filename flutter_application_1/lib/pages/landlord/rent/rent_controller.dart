@@ -11,7 +11,16 @@ class RentController extends GetxController {
   void onInit() {
     super.onInit();
     token = Get.find<AuthService>().token;
-    fetchRents();
+
+    ever(token, (_) {
+      if (token.value.isNotEmpty) {
+        fetchRents();
+      }
+    });
+
+    if (token.value.isNotEmpty) {
+      fetchRents();
+    }
   }
 
   Future<String> fetchTenantName(String tenantId) async {
@@ -39,11 +48,12 @@ class RentController extends GetxController {
   void fetchRents() async {
     try {
       if (token.value.isEmpty) {
+        print("Token is empty");
         Get.snackbar('Error', 'Token is missing, unable to fetch rents');
         return;
       }
 
-      print("Authorization Token Before Request: '${token.value}'");
+      print("Fetching rents with token: ${token.value}");
 
       final response = await http.get(
         Uri.parse('http://localhost:3000/rent/getRent'),
@@ -53,18 +63,26 @@ class RentController extends GetxController {
         },
       );
 
+      print("Response Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
       if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
         if (jsonResponse['status'] == true) {
-          // Validate and filter out rents with missing data
           rents.value = List<Map<String, dynamic>>.from(jsonResponse['success']
               .where(
-                  (rent) => rent['_id'] != null && rent['rentName'] != null));
+                  (rent) => rent['_id'] != null && rent['tenantName'] != null));
+
+          print("Fetched rents: ${rents.value}");
+        } else {
+          print(
+              "API Response does not contain expected structure: $jsonResponse");
         }
       } else {
         Get.snackbar('Error', 'Failed to fetch rents: ${response.statusCode}');
       }
     } catch (e) {
+      print("Exception in fetchRents: $e");
       Get.snackbar('Error', 'Something went wrong: $e');
     }
   }

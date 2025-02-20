@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.dart';
 import 'rent_details.dart';
 import 'package:intl/intl.dart';
+import 'package:snippet_coder_utils/hex_color.dart';
 import 'package:http/http.dart' as http;
 
 class TenantDetailsPage extends StatefulWidget {
@@ -197,12 +198,10 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
       appBar: AppBar(
         title: const Text(
           'Add Tenant Details',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.white),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        backgroundColor: HexColor("062356"),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -280,15 +279,12 @@ class _TenantDetailsPageState extends State<TenantDetailsPage> {
               ElevatedButton(
                 onPressed: _saveTenantDetails,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: HexColor("062356"),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                 ),
                 child: const Text(
                   'Save Tenant',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
               const SizedBox(height: 16),

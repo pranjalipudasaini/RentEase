@@ -244,6 +244,7 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: HexColor("062356"),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -363,7 +364,7 @@ class _RentDetailsPageState extends State<RentDetailsPage> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: const Text(
-                  'Save',
+                  'Save Rent',
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
