@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/applicant/applications/applications_controller.dart';
-import 'package:flutter_application_1/pages/applicant/applications/view_application.dart';
+import 'package:flutter_application_1/pages/landlord/applications/view_application.dart';
 import 'package:get/get.dart';
 
-class ApplicationsPage extends GetView<ApplicationsController> {
+class LandlordApplicationPage extends GetView<ApplicationsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        title: const Text('Your Applications'),
+        title: const Text('Applications'),
       ),
       body: Obx(() {
         if (controller.applications.isEmpty) {
@@ -36,7 +36,8 @@ class ApplicationsPage extends GetView<ApplicationsController> {
                   trailing: Icon(Icons.arrow_forward),
                   onTap: () {
                     // Navigate to the View Application page
-                    Get.to(() => ViewApplicationPage(application: application));
+                    Get.to(() =>
+                        LandlordViewApplicationPage(application: application));
                   },
                 ),
               );

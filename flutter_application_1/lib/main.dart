@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/applicant/applications/applications_controller.dart';
+import 'package:flutter_application_1/pages/applicant/auth_service.dart';
 import 'package:flutter_application_1/pages/applicant/home/home_controller.dart';
 import 'package:flutter_application_1/pages/applicant/properties/properties_controller.dart';
+import 'package:flutter_application_1/pages/landlord/applications/landlord_application_controller.dart';
 import 'package:flutter_application_1/pages/landlord/auth_service.dart';
 import 'package:flutter_application_1/pages/landlord/home/home_controller.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
@@ -16,12 +19,15 @@ import 'pages/login_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => AuthService().init());
+  await Get.putAsync(() => TenantAuthService().init());
   Get.put(HomeController());
   Get.put(PropertiesController());
   Get.put(TenantController());
   Get.put(RentController());
   Get.put(ApplicantHomeController());
   Get.put(ApplicantPropertiesController());
+  Get.put(ApplicationsController());
+  Get.put(LandlordApplicationController());
   // Run the app
   runApp(const MyApp());
 }

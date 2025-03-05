@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/landlord/applications/landlord_application_page.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -17,14 +18,84 @@ class LandlordDashboard extends StatelessWidget {
             backgroundColor: Colors.white,
             appBar: AppBar(
               title: const Text('Landlord Dashboard'),
+              leading: Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                ),
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.logout),
                   onPressed: () {
-                    controller.logout(context); // Use the controller to log out
+                    controller.logout(context);
                   },
                 ),
               ],
+            ),
+            drawer: Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Color(0xFF062356),
+                    ),
+                    child: Text(
+                      'Menu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.build),
+                    title: Text('Maintenance'),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.insert_drive_file),
+                    title: Text('Applications'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LandlordApplicationPage()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bar_chart),
+                    title: Text('Report'),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.task),
+                    title: Text('Tasks'),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.announcement),
+                    title: Text('Announcement'),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text('Settings'),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.logout),
+                    title: Text('Log Out'),
+                    onTap: () {
+                      controller.logout(context);
+                    },
+                  ),
+                ],
+              ),
             ),
             body: IndexedStack(
               index: controller.selectedIndex,
