@@ -1,46 +1,50 @@
 const PropertyServices = require("../services/property.services");
 const UserService = require("../services/user.services");
+const UserModel = require('../model/user.model');
 const jwt = require("jsonwebtoken");
+const userModel = require("../model/user.model");
 
 class PropertyController {
     // Create Property
     static async createPropertyHandler(req, res) {
         try {
             console.log("Headers received:", req.headers); // Debugging
-        
+    
             const authHeader = req.headers.authorization;
             if (!authHeader) {
                 return res.status(401).json({ success: false, message: "Authorization header is missing" });
             }
-        
+    
             const token = authHeader.split(" ")[1];
             if (!token) {
                 return res.status(401).json({ success: false, message: "Authorization token is missing" });
             }
-        
+    
             console.log("Extracted Token:", token); // Debugging
-        
+    
             const decodedToken = jwt.verify(token, "secretKey");
             console.log("Decoded Token:", decodedToken);
-        
+    
             const userId = decodedToken._id;
             if (!userId) {
                 return res.status(401).json({ success: false, message: "Invalid token: user ID is missing" });
             }
-        
+    
+            // Fetch the user from the database using userId
+            const user = await UserModel.findById(userId);
+            if (!user) {
+                return res.status(404).json({ success: false, message: "User not found" });
+            }
+    
+            const userEmail = user.email; 
+            const userName = user.fullName;
+    
             const { propertyName, address, country, city, furnishing, size, specifications, amenities } = req.body;
     
-            // Validate required fields
-            if (!propertyName) {
-                return res.status(400).json({ success: false, message: "Property name is required" });
+            if (!propertyName || !address || !city) {
+                return res.status(400).json({ success: false, message: "Required fields are missing" });
             }
-            if (!address) {
-                return res.status(400).json({ success: false, message: "Address is required" });
-            }
-            if (!city) {
-                return res.status(400).json({ success: false, message: "City is required" });
-            }
-        
+    
             // Optional validation for city
             const validCities = ['Kathmandu', 'Pokhara', 'Biratnagar', 'Bhaktapur', 'Lalitpur', 'Dharan', 'Birgunj'];
             if (!validCities.includes(city)) {
@@ -52,9 +56,11 @@ class PropertyController {
             if (existingProperty) {
                 return res.status(400).json({ success: false, message: "A property with this name already exists" });
             }
-        
+    
             const propertyData = {
                 userId,
+                userEmail,
+                userName,
                 propertyName,
                 address,
                 country,
@@ -64,7 +70,7 @@ class PropertyController {
                 specifications,
                 amenities,
             };
-        
+    
             const createdProperty = await PropertyServices.createProperty(propertyData);
     
             res.status(201).json({
@@ -72,12 +78,11 @@ class PropertyController {
                 property: createdProperty,
             });
         } catch (error) {
-            console.error("Error creating property:", error); // Debugging
+            console.error("Error creating property:", error);
             res.status(400).json({ success: false, message: error.message });
         }
     }
     
-
     // Get Property Data
     static async getPropertyData(req, res, next) {
         try {

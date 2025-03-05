@@ -64,9 +64,7 @@ class PropertyServices {
         } catch (error) {
             throw new Error("Error fetching available properties: " + error.message);
         }
-    }
-    
-    
+    }   
 }
 
 module.exports = PropertyServices;

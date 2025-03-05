@@ -187,7 +187,7 @@ class _ApplicantPropertiesPageState extends State<ApplicantPropertiesPage> {
                                           color: Color(0xFF062356)),
                                       const SizedBox(width: 6),
                                       Text(
-                                        property['owner'] ?? 'Unknown Owner',
+                                        property['userName'] ?? 'Unknown Owner',
                                         style: const TextStyle(
                                             fontSize: 14.0,
                                             color: Colors.black),

@@ -4,6 +4,8 @@ const { Schema } = mongoose;
 
 const propertySchema = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true }, 
+    userEmail: { type: String, ref: 'User', required: true, index: true }, 
+    userName: { type: String, ref: 'User', required: true, index: true }, 
     propertyName: { type: String, required: true },
     address: { type: String, required: true },
     country: { type: String, default: 'Nepal', required: true },
@@ -14,13 +16,14 @@ const propertySchema = new Schema({
         default: 'Kathmandu',
     },
     furnishing: { type: String, enum: ['Furnished', 'Unfurnished', 'Semi-Furnished'], default: 'Furnished' },
-    roadType: { type: String, default: 'Paved' }, // Moved roadType outside specifications
+    roadType: { type: String, default: 'Paved' }, 
     type: { 
         type: String,
         required: true,
         enum: ['Apartment', 'House', 'Condo', 'Land'],
-        default: 'Apartment', }, // Added default value
-    size: { type: Number, default: 0 }, // Added default value
+        default: 'Apartment',
+    },
+    size: { type: Number, default: 0 }, 
     specifications: {
         type: new Schema({
             bathrooms: { type: Number, default: 0 },
@@ -30,7 +33,6 @@ const propertySchema = new Schema({
         }, { _id: false }), 
         default: {} 
     },
-    
     amenities: {
         type: [String],
         validate: {
@@ -41,10 +43,9 @@ const propertySchema = new Schema({
             message: 'Invalid amenity value!',
         },
     },
-    images: { type: String, default: '' }, // Added image field
+    images: { type: String, default: '' }, 
     isAvailable: { type: Boolean, default: true },
-}, { timestamps: true }); // Added timestamps for createdAt & updatedAt
+}, { timestamps: true });
 
 const PropertyModel = db.model('Property', propertySchema);
-
 module.exports = PropertyModel;

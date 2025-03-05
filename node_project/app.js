@@ -1,10 +1,14 @@
+require('dotenv').config();
+
 const express = require('express');
 const body_parser = require('body-parser');
 const cors = require('cors');
+
 const userRouter = require('./routes/user.router');
 const propertyRouter = require('./routes/property.router');
 const tenantRouter = require('./routes/tenant.router');
 const rentRouter = require('./routes/rent.router');
+const applicationRouter = require('./routes/application.router');
 
 const app = express();
 
@@ -16,5 +20,6 @@ app.use('/', userRouter);
 app.use('/property', propertyRouter);
 app.use('/tenant',tenantRouter);
 app.use('/rent',rentRouter);
+app.use('/application',applicationRouter);
 
 module.exports = app;
