@@ -26,7 +26,7 @@ void main() async {
   Get.put(RentController());
   Get.put(ApplicantHomeController());
   Get.put(ApplicantPropertiesController());
-  Get.put(ApplicationsController());
+  Get.put(TenantApplicationController());
   Get.put(LandlordApplicationController());
   // Run the app
   runApp(const MyApp());

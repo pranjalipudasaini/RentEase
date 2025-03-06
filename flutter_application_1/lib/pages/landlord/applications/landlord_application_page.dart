@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/pages/applicant/applications/applications_controller.dart';
+import 'package:flutter_application_1/pages/landlord/applications/landlord_application_controller.dart';
 import 'package:flutter_application_1/pages/landlord/applications/view_application.dart';
 import 'package:get/get.dart';
 
-class LandlordApplicationPage extends GetView<ApplicationsController> {
+class LandlordApplicationPage extends GetView<LandlordApplicationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

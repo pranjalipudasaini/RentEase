@@ -3,7 +3,7 @@ import 'package:flutter_application_1/pages/applicant/applications/applications_
 import 'package:flutter_application_1/pages/applicant/applications/view_application.dart';
 import 'package:get/get.dart';
 
-class ApplicationsPage extends GetView<ApplicationsController> {
+class ApplicationsPage extends GetView<TenantApplicationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

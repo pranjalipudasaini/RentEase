@@ -71,7 +71,18 @@ class _LandlordViewApplicationPageState
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
             Text(
-                'Landlord Name: ${widget.application['landlordName'] ?? 'N/A'}',
+                'Employer Name: ${widget.application['employerName'] ?? 'N/A'}',
+                style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text('Job Title: ${widget.application['jobTitle'] ?? 'N/A'}',
+                style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text(
+                'Monthly/Annual Income: ${widget.application['income'] ?? 'N/A'}',
+                style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text(
+                'Previous/Current Landlord Name: ${widget.application['landlordName'] ?? 'N/A'}',
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 10),
             Text(

@@ -117,7 +117,7 @@ const getLandlordApplications = async (req, res) => {
         }
 
         // Fetch applications linked to this landlord
-        const applications = await Application.find({ landlordId });
+        const applications = await ApplicationServices.getLandlordApplicationData(landlordId);
 
         console.log("Landlord ID:", landlordId);
         console.log("Fetched Applications:", applications);
@@ -132,8 +132,6 @@ const getLandlordApplications = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
     }
 };
-
-
 
 const getApplicationData = async (req, res) => {
     try {
