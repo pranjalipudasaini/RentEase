@@ -21,9 +21,15 @@ const userSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['tenant', 'landlord'],
+        enum: ['tenant', 'landlord', 'tenant_planned'],
         default: 'tenant'
-    }
+    },
+    otp: { 
+        type: String 
+    }, 
+    otpExpiresAt: { 
+        type: Date 
+    },
 });
 
 

@@ -15,7 +15,7 @@ const ApplicationSchema = new Schema({
     jobTitle: { type: String },
     income: { type: String, required: true },
     landlordName: { type: String },
-    tenancyDuration: { type: String },
+    tenancyDuration: { type: String, required: true },
     reasonLeaving: { type: String },
     status: { type: String, enum: ['Pending', 'Approved', 'Declined'], default: 'Pending' },
     propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property', required: true },

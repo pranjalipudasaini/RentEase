@@ -115,3 +115,24 @@ exports.updateRole = async (req, res) => {
         res.status(500).json({ status: false, error: "Internal server error." });
     }
 };
+
+exports.sendOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const response = await UserService.generateAndSendOTP(email);
+        res.status(200).json({ status: true, message: response.message });
+    } catch (error) {
+        res.status(400).json({ status: false, error: error.message });
+    }
+};
+
+exports.verifyOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const response = await UserService.verifyOTP(email, otp);
+        res.status(200).json({ status: true, message: response.message });
+    } catch (error) {
+        res.status(400).json({ status: false, error: error.message });
+    }
+};
+

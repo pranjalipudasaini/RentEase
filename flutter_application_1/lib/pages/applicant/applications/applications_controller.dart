@@ -19,7 +19,7 @@ class TenantApplicationController extends GetxController {
       print("Fetching tenant applications...");
 
       final response = await http.get(
-        Uri.parse('http://localhost:3000/application/getApplicationData'),
+        Uri.parse('http://localhost:3000/application/getApplication'),
         headers: {
           'Authorization': 'Bearer ${token.value}',
           'Content-Type': 'application/json',
