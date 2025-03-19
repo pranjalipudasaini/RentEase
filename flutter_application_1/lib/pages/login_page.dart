@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/pages/landlord/landlord_dashboard.dart';
 import 'package:flutter_application_1/pages/applicant/tenant_dashboard.dart';
+import 'package:flutter_application_1/pages/tenant/tenant_plan_dashboard.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -59,10 +60,11 @@ class _LoginPageState extends State<LoginPage> {
 
         if (responseData['status'] == true) {
           var myToken = responseData['token'];
-          var role = responseData['role']; // Extract role from the response
+          var role = responseData['role'];
 
-          prefs.setString('token', myToken);
-          prefs.setString('role', role); // Save the role in SharedPreferences
+          await prefs.clear(); // Clears all previous data
+          await prefs.setString('token', myToken);
+          await prefs.setString('role', role);
 
           if (role == 'landlord') {
             Navigator.pushReplacement(
@@ -76,6 +78,13 @@ class _LoginPageState extends State<LoginPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => TenantDashboard(token: myToken),
+              ),
+            );
+          } else if (role == 'tenant_planned') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TenantPlanDashboard(token: myToken),
               ),
             );
           }

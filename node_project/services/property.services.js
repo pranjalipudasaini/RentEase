@@ -64,7 +64,17 @@ class PropertyServices {
         } catch (error) {
             throw new Error("Error fetching available properties: " + error.message);
         }
-    }   
+    } 
+    
+    static async getSingleProperty() {
+        try {
+            const property = await PropertyModel.findOne(); // Fetch any one property
+            return property;
+        } catch (error) {
+            throw new Error("Error fetching property: " + error.message);
+        }
+    }
+    
 }
 
 module.exports = PropertyServices;

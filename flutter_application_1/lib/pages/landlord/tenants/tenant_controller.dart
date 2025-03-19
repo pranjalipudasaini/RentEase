@@ -161,4 +161,25 @@ class TenantController extends GetxController {
       Get.snackbar("Error", "Error deleting tenant: $e");
     }
   }
+
+  Future<void> inviteTenant(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse("http://localhost:3000/send-otp"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer ${token.value}",
+        },
+        body: jsonEncode({"email": email}),
+      );
+
+      if (response.statusCode == 200) {
+        Get.snackbar("Success", "Tenant has been invited!");
+      } else {
+        Get.snackbar("Error", "Failed to invite tenant.");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong.");
+    }
+  }
 }

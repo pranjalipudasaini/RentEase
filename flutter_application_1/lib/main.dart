@@ -13,6 +13,13 @@ import 'package:flutter_application_1/pages/landlord/tenants/tenant_controller.d
 import 'package:flutter_application_1/pages/property_details.dart';
 import 'package:flutter_application_1/pages/signup_page.dart';
 import 'package:flutter_application_1/pages/applicant/tenant_dashboard.dart';
+import 'package:flutter_application_1/pages/tenant/announcements/planned_tenant_announcements_controller.dart';
+import 'package:flutter_application_1/pages/tenant/home/planned_tenant_home_controller.dart';
+import 'package:flutter_application_1/pages/tenant/payments/planned_tenant_payments_controller.dart';
+import 'package:flutter_application_1/pages/tenant/planned_tenant_auth_service.dart';
+import 'package:flutter_application_1/pages/tenant/profile/planned_tenant_profile_controller.dart';
+import 'package:flutter_application_1/pages/tenant/requests/planned_tenant_requests_controller.dart';
+import 'package:flutter_application_1/pages/tenant/tenant_plan_controller.dart';
 import 'package:get/get.dart';
 import 'pages/login_page.dart';
 
@@ -20,6 +27,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Get.putAsync(() => AuthService().init());
   await Get.putAsync(() => TenantAuthService().init());
+  Get.put(PlannedTenantAuthService());
   Get.put(HomeController());
   Get.put(PropertiesController());
   Get.put(TenantController());
@@ -28,6 +36,12 @@ void main() async {
   Get.put(ApplicantPropertiesController());
   Get.put(TenantApplicationController());
   Get.put(LandlordApplicationController());
+  Get.put(TenantPlanDashboardController());
+  Get.put(PlannedTenantRequestsController());
+  Get.put(PlannedTenantProfileController());
+  Get.put(PlannedTenantPaymentsController());
+  Get.put(PlannedTenantHomeController());
+  Get.put(PlannedTenantAnnouncementsController());
   // Run the app
   runApp(const MyApp());
 }

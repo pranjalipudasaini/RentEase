@@ -173,6 +173,19 @@ class PropertyController {
         }
     }
 
+    static async getSingleProperty(req, res) {
+        try {
+            const property = await PropertyServices.getSingleProperty();
+            if (!property) {
+                return res.status(404).json({ success: false, message: "No properties found" });
+            }
+            res.json({ success: true, property });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    
+
     static async toggle_availability(req, res) {
         try {
             const result = await PropertyServices.toggleAvailability(req.params.id);

@@ -50,21 +50,21 @@ class UserService {
         return { message: "OTP sent successfully." };
     }
 
-    // Verify OTP and update role
     static async verifyOTP(email, otp) {
         const user = await UserModel.findOne({ email });
-
+    
         if (!user || user.otp !== otp || user.otpExpiresAt < new Date()) {
             throw new Error("Invalid or expired OTP.");
         }
-
-        user.role = 'tenant';  // Change role to tenant
+    
+        user.role = 'tenant_planned';  // Change role to tenant_planned
         user.otp = null; // Clear OTP
         user.otpExpiresAt = null;
         await user.save();
-
-        return { message: "OTP verified. User role updated to tenant." };
+    
+        return { message: "OTP verified. User role updated to tenant_planned." };
     }
+    
 
     // Function to register a new user
     static async registerUser(fullName, email, password) {

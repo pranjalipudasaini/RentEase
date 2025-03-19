@@ -39,7 +39,7 @@ class TenantDashboardController extends ChangeNotifier {
   // Initialize the pages for navigation
   void _initializePages() {
     pages = [
-      ApplicantHomePage(email: email),
+      ApplicantHomePage(token: token, email: email),
       ApplicantPropertiesPage(),
       ApplicationsPage(),
       HelpPage(),

@@ -82,6 +82,13 @@ class TenantPage extends GetView<TenantController> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
+                          icon: const Icon(Icons.person_add,
+                              color: Color(0xFF4A78C9)),
+                          onPressed: () {
+                            _showInviteDialog(context, tenant['tenantEmail']);
+                          },
+                        ),
+                        IconButton(
                           icon:
                               const Icon(Icons.edit, color: Color(0xFF062356)),
                           onPressed: () {
@@ -160,6 +167,37 @@ class TenantPage extends GetView<TenantController> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30.0),
         ),
+      ),
+    );
+  }
+
+  void _showInviteDialog(BuildContext context, String? tenantEmail) {
+    if (tenantEmail == null || tenantEmail.isEmpty) {
+      Get.snackbar("Error", "Tenant email is missing.");
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Invite Tenant"),
+        content:
+            Text("Do you want to invite $tenantEmail to the property plan?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel",
+                style: TextStyle(color: Color(0xFF062356))),
+          ),
+          TextButton(
+            onPressed: () {
+              tenantController.inviteTenant(tenantEmail);
+              Navigator.pop(context);
+            },
+            child:
+                const Text("Add", style: TextStyle(color: Color(0xFFF2B138))),
+          ),
+        ],
       ),
     );
   }
