@@ -44,6 +44,15 @@ try {
   throw new Error("Error checking rent name: " + error.message);
 }
 }
+
+static async getSingleRent() {
+        try {
+            const rent = await RentModel.findOne(); // Fetch any one property
+            return rent;
+        } catch (error) {
+            throw new Error("Error fetching rent: " + error.message);
+        }
+    }
 }
 
 module.exports = RentServices;

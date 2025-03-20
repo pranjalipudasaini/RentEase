@@ -147,6 +147,18 @@ static async updateRentHandler(req, res) {
         res.status(500).json({ success: false, message: "Error updating rent: " + error.message });
     }
 }
+
+static async getSingleRent(req, res) {
+        try {
+            const rent = await RentServices.getSingleRent();
+            if (!rent) {
+                return res.status(404).json({ success: false, message: "No rent found" });
+            }
+            res.json({ success: true, rent });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = RentController;

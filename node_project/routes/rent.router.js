@@ -6,6 +6,7 @@ router.post('/saveRent', RentController.saveRent);
 router.get("/getRent", RentController.getRentData); 
 router.delete("/deleteRent/:id", RentController.deleteRentHandler);
 router.put("/updateRent/:id", RentController.updateRentHandler);
+router.get("/getSingleRent", RentController.getSingleRent);
 
 module.exports = router;
 
