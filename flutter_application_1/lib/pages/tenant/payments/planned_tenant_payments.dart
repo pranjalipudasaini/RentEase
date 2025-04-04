@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/tenant/payments/esewa_payment_screen.dart';
 import 'package:flutter_application_1/pages/tenant/payments/planned_tenant_view_rent.dart';
 import 'package:get/get.dart';
 import 'planned_tenant_payments_controller.dart';
@@ -59,18 +60,22 @@ class PlannedTenantPayments extends GetView<PlannedTenantPaymentsController> {
                           const SizedBox(height: 8.0),
                           Text("Due Date: ${rent['dueDate'] ?? 'N/A'}"),
                           const SizedBox(height: 6.0),
-                          Text("Other Charges: \$${rent['otherCharges'] ?? 0}"),
+                          Text(
+                              "Other Charges: \Rs. ${rent['otherCharges'] ?? 0}"),
                           const SizedBox(height: 6.0),
                           Text(
-                              "Late Fee: \$${rent['lateFeeCharges']['amount'] ?? 0}"),
+                              "Late Fee: \Rs. ${rent['lateFeeCharges']['amount'] ?? 0}"),
                           const SizedBox(height: 12.0),
                           ElevatedButton(
                             onPressed: () {
-                              // Handle Payment Logic
+                              Get.to(() => EsewaPaymentScreen(
+                                    amount: rent['totalAmount'] ?? 0.0,
+                                    productId: rent['id'].toString(),
+                                    productName: "Rent Payment",
+                                  ));
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF062356),
-                            ),
+                                backgroundColor: Color(0xFF062356)),
                             child: const Text("Pay Now",
                                 style: TextStyle(color: Colors.white)),
                           ),
