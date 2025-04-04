@@ -36,7 +36,7 @@ class TenantPlanDashboardController extends GetxController {
     pages.assignAll([
       PlannedTenantHome(),
       PlannedTenantPayments(),
-      PlannedTenantRequests(),
+      MaintenanceRequestPage(),
       PlannedTenantAnnouncements(),
       PlannedTenantProfile(),
     ]);

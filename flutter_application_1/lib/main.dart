@@ -37,7 +37,7 @@ void main() async {
   Get.put(TenantApplicationController());
   Get.put(LandlordApplicationController());
   Get.put(TenantPlanDashboardController());
-  Get.put(PlannedTenantRequestsController());
+  Get.put(MaintenanceRequestPageController());
   Get.put(PlannedTenantProfileController());
   Get.put(PlannedTenantPaymentsController());
   Get.put(PlannedTenantHomeController());
